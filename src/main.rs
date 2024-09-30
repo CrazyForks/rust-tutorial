@@ -19,12 +19,18 @@ pub struct Program {
 pub enum Command {
     TODO {
         #[arg(short, long, default_value = None)]
-        find: String,
+        find: Option<String>,
     },
 }
 
 // main 函数 是一个程序的开始
 fn main() {
     let args = Program::parse();
-    println!("args: -- {:?}", args);
+
+    match args.command {
+        Command::TODO { find } => match find {
+            Some(val) => print!("find {}", val),
+            _ => {}
+        },
+    }
 }

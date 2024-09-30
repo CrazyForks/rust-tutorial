@@ -131,3 +131,76 @@ fn main() {
 ```
 
 之后使用 `cargo run -- todo --find a` 即可运行。
+
+```sh
+# 输出内容
+args: -- Program { command: TODO { find: "a" } }
+```
+
+`cargo run` 是运行程序。
+
+后面跟随的 `--` 是为了分隔，否则就会造成冲突。比如:
+
+- `cargo run --help` 是查看 `cargo run` 这条命令的帮助内容。
+
+- `cargo run -- --help` 则是查看我们编写的程序的帮助内容。
+
+后面的 `todo` 和 `--find a` 则是在 `Command` 枚举中定义的成员。
+
+### 可选参数
+
+如果有试着不加 `--find` 参数，那么就会发现程序报错了。
+
+因为 `--find` 参数是必须的。
+
+如果需要使用可选参数，则需要这样做：
+
+```rust
+// ...
+
+// 声明枚举
+#[derive(Debug, Clone, Subcommand)] // 派生宏
+pub enum Command {
+    TODO {
+        #[arg(short, long, default_value = None)]
+        // Option<T> 是一个枚举
+        // 具有两种状态 Some(T) 和 None
+        // 分别代表有值和无值
+        // 通过它就可以让值可选
+        find: Option<String>,
+    },
+}
+
+// ...
+```
+
+执行 `cargo run -- todo`, 现在不会报错了。
+
+```sh
+cargo run -- todo
+# args: -- Program { command: TODO { find: None } }
+
+cargo run -- todo --find a
+# args: -- Program { command: TODO { find: Some("a") } }
+```
+
+## 模式匹配
+
+将 `main` 函数改造一下。
+
+```rust
+fn main() {
+    let args = Program::parse();
+
+    match args.command {
+        Command::TODO { find } => match find {
+            Some(val) => print!("find {}", val),
+            _ => {}
+        },
+    }
+}
+```
+
+## 模块化
+
+## 发布
