@@ -1,6 +1,19 @@
 [package]
-name = "rust"
+name = "cli"
 version = "0.1.0"
 edition = "2021"
+author = ["inksha <admin@inksha.com>"]
+description = "one simple Rust tutorial"
+repository = "https://github.com/InkSha/rust-tutorial.git"
+license = "MIT"
+
 
 [dependencies]
+clap = { version = "4.5.16", features = ["derive"] }
+comfy-table = "7.1.1"
+console = "0.15.8"
+dialoguer = "0.11.0"
+indicatif = "0.17.8"
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+serde = { version = "1.0.208", features = ["derive"] }
+serde_json = "1.0.125"
