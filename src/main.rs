@@ -5,7 +5,7 @@
 use clap::Parser;
 use todo::core::Command;
 
-use crate::todo::{add::add_todo, core::{create_todo, TodoItem}, find::find_todo};
+use crate::todo::{add::add_todo, core::TodoItem, find::find_todo};
 
 mod todo;
 
@@ -20,12 +20,11 @@ pub struct Program {
 // main 函数 是一个程序的开始
 fn main() {
   let mut todo_list: Vec<TodoItem> = vec![
-    create_todo("learn".to_string(), "learn rust".to_string()),
-    create_todo("work".to_string(), "requirement 1 must be completed before next week".to_string()),
-    create_todo("play".to_string(),"play games".to_string()),
-    create_todo("read".to_string(),"read books".to_string()),
+    TodoItem::new("learn".to_string(), "learn rust".to_string()),
+    TodoItem::new("work".to_string(), "requirement 1 must be completed before next week".to_string()),
+    TodoItem::new("play".to_string(),"play games".to_string()),
+    TodoItem::new("read".to_string(),"read books".to_string()),
   ];
-
 
   // 使用 clap 自动解析命令行参数，返回 Program 实例
   let args = Program::parse();

@@ -18,6 +18,12 @@ pub fn create_todo(title: String, content: String) -> TodoItem{
   }
 }
 
+impl TodoItem {
+  pub fn new(title: String, content: String) -> Self {
+    create_todo(title, content)
+  }
+}
+
 // 声明枚举
 #[derive(Debug, Clone, Subcommand)] // 派生宏
 pub enum Command {

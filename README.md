@@ -632,7 +632,24 @@ Rust 为模块引用增加了一些模块路径前缀，或者说别名：
 
 ### 为结构体实现方法
 
-### 孤儿原则
+在先前的代码中，我们使用到了 `use super::core::{TodoItem,create_todo};` 用来分别引入 `TodoItem` 和创建它的函数。
+
+但实际上，我们完全可以将 `create_todo` 这个独立函数作为 `TodoItem` 的一个关联函数来实现。
+这样在调用时语义上更加自然，也符合 Rust 的结构体设计习惯。
+
+```rust
+impl TodoItem {
+  pub fn new(title: String, content: String) -> Self {
+    create_todo(title, content)
+  }
+}
+```
+
+以上代码为结构体 `TodoItem` 实现了 `new` 构造函数。
+
+> _Rust 中使用 new 作为构造器名称是一个约定俗成的规则，且 Rust 没有 new 关键字。_
+
+再次修改代码，将 `create_todo` 更改为 `TodoItem::new`。
 
 ### 项目组织
 

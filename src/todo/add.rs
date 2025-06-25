@@ -1,4 +1,4 @@
-use super::core::{TodoItem,create_todo};
+use super::core::TodoItem;
 
 pub fn add_todo(title: Option<String>, content: Option<String>, todo_list: &mut Vec<TodoItem>) {
   match title {
@@ -18,7 +18,7 @@ pub fn add_todo(title: Option<String>, content: Option<String>, todo_list: &mut 
       }
 
       println!("title: {}, content: {}", title, todo);
-      todo_list.push(create_todo(title, todo));
+      todo_list.push(TodoItem::new(title, todo));
 
     }
     _ => println!("No title or content provided"),
