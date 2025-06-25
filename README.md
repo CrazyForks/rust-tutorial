@@ -318,13 +318,149 @@ non-exhaustive patterns: `Command::ADD { .. }` not covered the matched value is 
 
 ## 结构体
 
-将 TODO 项定义为结构体，引入结构体，访问修饰符，特征等知识。
+目前我们已经实现了通过命令行添加和查找 TODO 项的功能，但这些内容仅仅是打印输出，并没有真正保存下来。
+
+但是目前的 TODO 项分为 `title` 和 `content` 两个部分。
+
+我们可以使用结构体来存储 TODO 项信息。
 
 ### 定义 TODO 结构体
 
+```rust
+/// TodoItem 结构体
+pub struct TodoItem {
+  /// 标题
+  pub title: String,
+  /// 内容
+  pub content: String,
+  /// 状态
+  pub done: bool,
+}
+```
+
+实现结构体的方式如下:
+
+```rust
+let learn = TodoItem {
+    title: String::from("learn"),
+    content: String::from("learn rust"),
+    done: false,
+}
+
+let work = TodoItem {
+    title: String::from("work"),
+    content: String::from("requirement 1 must be completed before next week"),
+    done: true,
+}
+```
+
+但是这样写着比较繁琐，因此我们可以实现一个函数来简化创建 todo 项。
+
+```rust
+fn create_todo(title: String, content: String) -> TodoItem{
+  TodoItem {
+    title,
+    content,
+    done: false
+  }
+}
+
+let learn = create_todo("learn".to_string(), "learn rust".to_string())
+let work = create_todo("work".to_string(), "requirement 1 completed".to_string())
+```
+
+现在我们改造 `main` 函数。
+
+```rust
+fn main() {
+    let mut todo_list: Vec<TodoItem> = vec![
+      create_todo("learn".to_string(), "learn rust".to_string()),
+      create_todo("work".to_string(), "requirement 1 completed".to_string()),
+      create_todo("play".to_string(),"play games".to_string()),
+      create_todo("read".to_string(),"read books".to_string()),
+    ];
+
+    // 使用 clap 自动解析命令行参数，返回 Program 实例
+    let args = Program::parse();
+
+    // 模式匹配 command 字段
+    match args.command {
+        // 如果是 Command::TODO 就将字段 find 解构出来
+        Command::TODO { find } => match find {
+            // 因为是 Option<String> 类型
+            // 需要额外的模式匹配
+            Some(val) => {
+              println!("find {}", val);
+              for item in todo_list {
+                if item.title.contains(&val) {
+                  let status: String;
+                  if item.done{
+                    status = String::from("X");
+                  } else {
+                    status = String::from(" ");
+                  }
+                  println!("[{:}] {:?} {:?}", status, item.title, item.content);
+                }
+              }
+            },
+            None => println!("No --find argument provided"),
+        },
+        Command::ADD { title, content } => {
+            match title {
+                Some(title) => {
+                  // 这里声明了一个变量 todo, 类型为 String, 尚未赋值
+                  let todo: String;
+
+                  // 这里使用 if let 表达式
+                  // 它的作用是将 content 绑定到一个新的变量 content
+                  // 并在 content 不是 None 时执行代码块
+                  // 这样就不需要再额外的模式匹配了
+                  if let Some(content) = content {
+                    todo = content;
+                  } else{
+                    // 如果 content 是 None, 则使用默认值
+                    todo = String::from("default todo content");
+                  }
+
+                  println!("title: {}, content: {}", title, todo);
+
+                  todo_list.push(create_todo(title, todo));
+
+                }
+                _ => println!("No title or content provided"),
+            }
+        }
+    }
+}
+```
+
+现在运行 `cargo run -- todo --find` 命令就可以查到内容了。
+
 ### 访问修饰符
 
-### 实现特征
+默认情况下，Rust 中的所有项都是私有的, 只能在定义它们的模块内访问。
+
+通过访问修饰符 `pub` ，可以将结构体、枚举、函数变为外部可见的。
+
+在之前的代码中，`pub` 使用的地方相当多。
+
+```rust
+// 外部可见 TodoItem 结构体
+pub struct TodoItem {
+  // 外部可见 TodoItem 结构体的 id 属性
+  pub id: i32;
+  // ...
+}
+
+// 外部可见 Command 枚举
+pub enum Command {
+  // 与结构体不同，只要将枚举定义为 pub 的
+  // 那么它的枚举值将自动外部可见
+  // 这是因为如果不外部可见枚举值，那么这个枚举相当于没用了
+  TODO,
+  // ...
+}
+```
 
 ## 模块化
 

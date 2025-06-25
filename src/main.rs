@@ -29,8 +29,33 @@ pub enum Command {
     },
 }
 
+/// TodoItem 结构体
+pub struct TodoItem {
+  /// 标题
+  pub title: String,
+  /// 内容
+  pub content: String,
+  /// 状态
+  pub done: bool,
+}
+
+fn create_todo(title: String, content: String) -> TodoItem{
+  TodoItem {
+    title,
+    content,
+    done: false
+  }
+}
+
 // main 函数 是一个程序的开始
 fn main() {
+    let mut todo_list: Vec<TodoItem> = vec![
+      create_todo("learn".to_string(), "learn rust".to_string()),
+      create_todo("work".to_string(), "requirement 1 must be completed before next week".to_string()),
+      create_todo("play".to_string(),"play games".to_string()),
+      create_todo("read".to_string(),"read books".to_string()),
+    ];
+
     // 使用 clap 自动解析命令行参数，返回 Program 实例
     let args = Program::parse();
 
@@ -40,7 +65,20 @@ fn main() {
         Command::TODO { find } => match find {
             // 因为是 Option<String> 类型
             // 需要额外的模式匹配
-            Some(val) => println!("find {}", val),
+            Some(val) => {
+              println!("find {}", val);
+              for item in todo_list {
+                if item.title.contains(&val) {
+                  let status: String;
+                  if item.done{
+                    status = String::from("X");
+                  } else {
+                    status = String::from(" ");
+                  }
+                  println!("[{:}] {:?} {:?}", status, item.title, item.content);
+                }
+              }
+            },
             None => println!("No --find argument provided"),
         },
         Command::ADD { title, content } => {
@@ -61,6 +99,9 @@ fn main() {
                   }
 
                   println!("title: {}, content: {}", title, todo);
+
+                  todo_list.push(create_todo(title, todo));
+
                 }
                 _ => println!("No title or content provided"),
             }
