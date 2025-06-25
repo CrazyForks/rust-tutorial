@@ -464,9 +464,173 @@ pub enum Command {
 
 ## 模块化
 
-引入 Rust 模块化开发知识。
+迄今为止，我们已经实现了 todo 项的查找和增加了。也定义了相关的代码结构。
+
+但是这些代码混在在一起显得程序看起来有些紊乱。
+
+所以我们需要将这些代码进行拆分，进行模块化。
 
 ### 拆分文件
+
+目前的项目结构如下:
+
+```bash
+|- src
+  |- main.rs
+```
+
+我们将代码进行拆分，建立以下文件:
+
+```bash
+|- src            # 项目的主源代码目录
+  |- main.rs      # 应用程序入口，负责解析命令行参数并调用具体逻辑
+  |- todo         # todo 模块，封装所有与待办事项相关的逻辑
+    |- add.rs     # 实现 "add" 命令的处理逻辑（添加 TODO 项）
+    |- core.rs    # 定义核心数据结构（如 TodoItem）及通用操作
+    |- find.rs    # 实现 "find" 命令的处理逻辑（查找 TODO 项）
+  |- todo.rs      # todo 模块入口，声明并组织 todo 子模块
+```
+
+`src/todo.rs` 文件内容如下：
+
+```rust
+pub mod add;
+pub mod find;
+pub mod core;
+```
+
+`src/todo/add.rs` 文件内容如下：
+
+```rust
+use super::core::{TodoItem,create_todo};
+
+pub fn add_todo(title: Option<String>, content: Option<String>, todo_list: &mut Vec<TodoItem>) {
+  match title {
+    Some(title) => {
+      let todo: String;
+
+      if let Some(content) = content {
+        todo = content;
+      } else{
+        todo = String::from("default todo content");
+      }
+
+      println!("title: {}, content: {}", title, todo);
+      todo_list.push(create_todo(title, todo));
+
+    }
+    _ => println!("No title or content provided"),
+  }
+}
+```
+
+`src/todo/core.rs` 文件内容如下：
+
+```rust
+use clap::Subcommand;
+
+pub struct TodoItem {
+  pub title: String,
+  pub content: String,
+  pub done: bool,
+}
+
+pub fn create_todo(title: String, content: String) -> TodoItem{
+  TodoItem {
+    title,
+    content,
+    done: false
+  }
+}
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum Command {
+  TODO {
+    #[arg(short, long, default_value = None)]
+    find: Option<String>,
+  },
+  ADD {
+    #[arg(short, long, default_value = None)]
+    title: Option<String>,
+    #[arg(short, long, default_value = None)]
+    content: Option<String>,
+  },
+}
+```
+
+`src/todo/find.rs` 文件内容如下：
+
+```rust
+use super::core::TodoItem;
+
+pub fn find_todo(find: Option<String>, todo_list: &Vec<TodoItem>){
+  match find {
+    Some(val) => {
+      println!("find {}", val);
+      for item in todo_list {
+        if item.title.contains(&val) {
+          let status: String;
+          if item.done{
+            status = String::from("X");
+          } else {
+            status = String::from(" ");
+          }
+          println!("[{:}] {:?} {:?}", status, item.title, item.content);
+        }
+      }
+    },
+    None => println!("No --find argument provided"),
+  }
+}
+```
+
+`src/main.rs` 文件内容如下：
+
+```rust
+use clap::Parser;
+use todo::core::Command;
+use crate::todo::{add::add_todo, core::{create_todo, TodoItem}, find::find_todo};
+
+mod todo;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about=None)]
+pub struct Program {
+    #[command(subcommand)]
+    pub command: Command,
+}
+
+fn main() {
+  let mut todo_list: Vec<TodoItem> = vec![
+    create_todo("learn".to_string(), "learn rust".to_string()),
+    create_todo("work".to_string(), "requirement 1 must be completed before next week".to_string()),
+    create_todo("play".to_string(),"play games".to_string()),
+    create_todo("read".to_string(),"read books".to_string()),
+  ];
+
+  let args = Program::parse();
+
+  match args.command {
+    Command::TODO { find } => find_todo(find, &todo_list),
+    Command::ADD { title, content } => add_todo(title, content, &mut todo_list)
+  }
+}
+
+```
+
+在拆分的文件中可以看见 `use super::core::{TodoItem,create_todo};` 这样的内容。
+
+Rust 为模块引用增加了一些模块路径前缀，或者说别名：
+
+- crate: 根模块，代表当前项目
+- self: 当前模块自身
+- super: 当前模块的父模块
+
+`use super::core::{TodoItem,create_todo};` 的作用为使用兄弟模块 `core` 的内容。
+
+而 `mod xx` 则是表示声明一个模块。`pub mod xx` 则是将这个模块给暴露为外部可访问。
+
+### 为结构体实现方法
 
 ### 孤儿原则
 
