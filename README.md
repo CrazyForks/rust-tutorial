@@ -221,6 +221,74 @@ help: consider cloning the value if the performance cost is acceptable
 
 > 创建一个引用的行为叫做借用。引用则是借用这个行为的结果。
 
+我们再次运行 `cargo run -- a b`，可以发现编译通过了。
+
 ### 可变变量
+
+在当前实现中，每次运行程序都需要输入两个参数（标题和内容），否则程序会因索引越界而报错。
+为了提升程序的健壮性，我们可以为缺失的参数设置默认值。
+
+修改代码:
+
+```rust
+use std::env;
+
+fn main() {
+  let args: Vec<String> = env::args().collect();
+  let len = args.len();
+  let title = args[1].clone();
+  let content = String::from("default content");
+
+  if len > 2{
+    content = args[2].clone();
+  }
+
+  println!("todo title: {}, content: {}", title, content);
+}
+```
+
+以上代码中，我们对输入参数做了检查，一旦参数数量大于 2 个，就会使用第三个参数作为内容。否则就会使用默认值。
+
+执行 `cargo run -- a`，发现又有报错了。
+
+```bash
+error[E0384]: cannot assign twice to immutable variable `content`
+  --> src\main.rs:10:5
+   |
+7  |   let content = String::from("default content");
+   |       ------- first assignment to `content`
+...
+10 |     content = args[2].clone();
+   |     ^^^^^^^ cannot assign twice to immutable variable
+   |
+help: consider making this binding mutable
+   |
+7  |   let mut content = String::from("default content");
+   |       +++
+```
+
+这是因为 Rust 出于安全性和可读性考虑，默认所有变量都是不可变的。
+这段报错的意思是：不能对不可变变量 `content` 进行二次赋值，除非将它声明为可变的。
+
+编译器已经为我们提示了。在 `let` 后面增加 `mut` 关键字即可。
+
+```rust
+use std::env;
+
+fn main() {
+  let args: Vec<String> = env::args().collect();
+  let len = args.len();
+  let title = args[1].clone();
+  let mut content = String::from("default content");
+
+  if len > 2{
+    content = args[2].clone();
+  }
+
+  println!("todo title: {}, content: {}", title, content);
+}
+```
+
+再次执行 `cargo run -- a`，成功运行。
 
 ### 变量类型
