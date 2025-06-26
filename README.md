@@ -291,4 +291,21 @@ fn main() {
 
 再次执行 `cargo run -- a`，成功运行。
 
-### 变量类型
+### 类型推断
+
+Rust 是一门强类型的语言，这意味着变量在编译时必须要有明确的类型。
+
+Rust 是类型后置的，通过在变量名称后面增加类型来指定变量类型。
+例如：`let args: Vec<String> = env::args().collect();`。
+
+不过，Rust 有着强大的类型推断机制，使得我们在大多数情况下，不需要手动标注类型。
+编译器会自动推断类型，只有当编译器无法推断类型时才需要手动标注。
+
+例如以下代码中，我们并未显式声明 `len`, `title` 或 `content` 的类型，但它们的类型仍然是确定的：
+
+```rust
+  let args: Vec<String> = env::args().collect();
+  let len = args.len();
+  let title = args[1].clone();
+  let mut content = String::from("default content");
+```
