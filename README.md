@@ -95,17 +95,37 @@ fn main() {
 }
 ```
 
-命令行运行 `cargo run -- a b c`，结果如下：
+命令行运行 `cargo run -- a b`，结果如下：
 
 ```bash
 [
     "target\\debug\\cli.exe",
     "a",
     "b",
-    "c",
 ]
 ```
 
 可以看见，我们获得的输入是一个数组格式，它的第一项是我们的可执行文件路径。
 
-我们需要的是输入的内容，即 `a,b,c`。
+我们需要的是输入的内容，即 `a,b`。
+
+调整代码：
+
+```rust
+use std::env;
+
+fn main() {
+  let args: Vec<String> = env::args().collect();
+
+  let title = args[1].clone();
+  let content = args[2].clone();
+
+  println!("todo title: {}, content: {}", title, content);
+}
+```
+
+这里我们使用 `args[1]` 获取到输入的第一项。
+
+但这样存在一个问题，当我们没有输入足够的参数时，程序会报错。
+
+我们可以增加默认参数。
