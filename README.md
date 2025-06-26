@@ -117,15 +117,110 @@ use std::env;
 fn main() {
   let args: Vec<String> = env::args().collect();
 
-  let title = args[1].clone();
-  let content = args[2].clone();
+  let title = args[1];
+  let content = args[2];
 
   println!("todo title: {}, content: {}", title, content);
 }
 ```
 
-这里我们使用 `args[1]` 获取到输入的第一项。
+运行 `cargo run -- a b`。会发现有报错：
 
-但这样存在一个问题，当我们没有输入足够的参数时，程序会报错。
+```bash
+error[E0507]: cannot move out of index of `Vec<String>`
+ --> src\main.rs:6:15
+  |
+6 |   let title = args[1];
+  |               ^^^^^^^ move occurs because value has type `String`, which does not implement the `Copy` trait
+  |
+help: consider borrowing here
+  |
+6 |   let title = &args[1];
+  |               +
+help: consider cloning the value if the performance cost is acceptable
+  |
+6 |   let title = args[1].clone();
+  |                      ++++++++
 
-我们可以增加默认参数。
+error[E0507]: cannot move out of index of `Vec<String>`
+ --> src\main.rs:7:17
+  |
+7 |   let content = args[2];
+  |                 ^^^^^^^ move occurs because value has type `String`, which does not implement the `Copy` trait
+  |
+help: consider borrowing here
+  |
+7 |   let content = &args[2];
+  |                 +
+help: consider cloning the value if the performance cost is acceptable
+  |
+7 |   let content = args[2].clone();
+  |                        ++++++++
+```
+
+### 所有权
+
+以上报错的关键如下：
+
+```bash
+cannot move out of index of `Vec<String>`
+
+move occurs because value has type `String`, which does not implement the `Copy` trait
+```
+
+它的意思是: 无法从 `Vec<String>` 中取出值，因为 `String` 类型没有实现 `Copy` 特征，无法被隐式复制。
+
+在前面有提及到：
+
+> Rust 它从语言设计层面 “不信任开发者”，认为 “你总有一天会犯错”。
+>
+> 因此，Rust 引入了所有权系统、借用检查和生命周期机制。以求在编译阶段就将那些 “未来可能出问题的代码” 拒之门外。
+
+这里就是因为 Rust 引入的所有权系统导致的问题。
+
+根据 Rust 所有权规则：
+
+- 每个值都有一个所有者。
+- 每个值同时只能有一个所有者。
+- 当所有者离开作用域时，这个值将被丢弃。
+
+以上报错就很好理解了。
+
+我们试图从 `Vec<String>` 这个类型中取出值，但是根据所有权原则，每个值都只能有一个所有者。
+因此 `Vec<String>` 拥有它内部所有 `String` 元素的所有权。
+
+当我们使用 `args[1]` 这样的方式访问时，实际上是尝试将该元素的所有权 “移动” 到另一个变量。这就违反了所有权规则，
+因为 `args` 还可能在后续被使用，如果移动了元素所有权，那么会导致它内部状态不一致，甚至出现悬垂指针、重复释放等问题。
+
+### 引用和借用
+
+Rust 在其语言设计层面上“不信任开发者”，因此它采用了所有权系统来强制保障内存安全。
+编译器非常“智能”，它不仅会告诉你哪里出错了，还会提供修复建议。
+
+比如，下面的编译错误信息中就给出了两种可能的解决方式：
+
+```bash
+help: consider borrowing here
+  |
+6 |   let title = &args[1];
+  |               +
+help: consider cloning the value if the performance cost is acceptable
+  |
+6 |   let title = args[1].clone();
+  |                      ++++++++
+```
+
+第一种方法是 `let title = &args[1];`, 它表示借用 `args[1]` 的值，而不移动它的所有权。
+这种方式高效，不会复制数据，但是变量的类型将变为 `&String`，表示这个变量是一个 `String` 值的引用。
+因此它将受到引用对象的限制。当 `args` 失效，那么它的引用也将失效。
+
+而第二种方法是 `let title = args[1].clone();`，它表示克隆 `args[1]` 的值，
+并将这个值移动到 `title` 变量中，这样 `args` 失效时，也不会影响 `title` 的使用。
+
+因此，我们选择使用第二种方式，显式调用 `clone` 方法，克隆一份 `args[1]` 的值。
+
+> 创建一个引用的行为叫做借用。引用则是借用这个行为的结果。
+
+### 可变变量
+
+### 变量类型
