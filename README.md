@@ -567,3 +567,50 @@ let role = match auth_level {   // 返回值给变量声明
   _ => "Unknow"                 // 默认分支，匹配所有剩余情况
 }
 ```
+
+## 结构体
+
+目前，我们的 Todo 项分别有 Title 和 Content 两个属性。
+
+为了更好的表达两者之间的关系，我们可以使用 Rust 中的结构体将它们组织在一起。
+
+结构体是一种可以由我们自定义的数据类型。能够将多种字段打包在一起形成一个整体，便于管理，传递和扩展。
+
+改造 `main.rs`。
+
+```rust
+struct TodoItem {
+    title: String,
+    content: String,
+}
+
+fn main() {
+  let mut todos: Vec<TodoItem> = Vec::new();
+  todos.push(TodoItem {
+      title: "learn rust".to_string(),
+      content: "read rust book".to_string(),
+  });
+  todos.push(TodoItem {
+      title: "work".to_string(),
+      content: "complete required".to_string(),
+  });
+  todos.push(TodoItem {
+      title: "play".to_string(),
+      content: "play game".to_string(),
+  });
+
+  // ...
+        "list" => {
+            for todo in todos {
+                println!("todo title: {}, content: {}", todo.title, todo.content);
+            }
+        }
+  // ...
+}
+```
+
+以上代码中，我们定义了一个名为 `TodoItem` 的结构体，它包含了 `title` 和 `content` 两个属性，分别代表 Todo 项的标题和内容。
+
+在 `main` 函数中，我们用一个 `Vec<TodoItem>` 来保存多个 Todo 项，每个 Todo 项都是一个结构体实例。
+
+当匹配到 `"list"` 命令时，我们遍历 `todos` 列表，打印每个 Todo 的标题和内容，实现了简单的查看功能。
