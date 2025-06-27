@@ -86,10 +86,8 @@ fn main() {
 更改 `main.rs` 为如下内容：
 
 ```rust
-use std::env;
-
 fn main() {
-  let args: Vec<String> = env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
 
   println!("{:#?}", args);
 }
@@ -112,10 +110,8 @@ fn main() {
 调整代码：
 
 ```rust
-use std::env;
-
 fn main() {
-  let args: Vec<String> = env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
 
   let title = args[1];
   let content = args[2];
@@ -231,10 +227,8 @@ help: consider cloning the value if the performance cost is acceptable
 修改代码:
 
 ```rust
-use std::env;
-
 fn main() {
-  let args: Vec<String> = env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
   let len = args.len();
   let title = args[1].clone();
   let content = String::from("default content");
@@ -273,10 +267,8 @@ help: consider making this binding mutable
 编译器已经为我们提示了。在 `let` 后面增加 `mut` 关键字即可。
 
 ```rust
-use std::env;
-
 fn main() {
-  let args: Vec<String> = env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
   let len = args.len();
   let title = args[1].clone();
   let mut content = String::from("default content");
@@ -298,7 +290,7 @@ Rust 是一门强类型的语言，这意味着变量在编译时必须要有明
 类型确定方式有两种，分别是显式声明和隐式推断。
 
 显式声明, 在变量名称后面使用 `:` 指定类型。
-例如：`let args: Vec<String> = env::args().collect();`。将变量 `args` 的类型指定为 `Vec<String>`。
+例如：`let args: Vec<String> = std::env::args().collect();`。将变量 `args` 的类型指定为 `Vec<String>`。
 
 隐式推断, 编译器根据变量的值和上下文推断变量的类型。
 而 Rust 有着强大的类型推断机制，使得我们在大多数情况下，不需要手动标注类型。
@@ -307,7 +299,7 @@ Rust 是一门强类型的语言，这意味着变量在编译时必须要有明
 例如以下代码中，我们并未显式声明 `len`, `title` 或 `content` 的类型，但它们的类型仍然是确定的：
 
 ```rust
-  let args: Vec<String> = env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
   let len /** usize */ = args.len();
   let title /** String */ = args[1].clone();
   let mut content /** String */ = String::from("default content");
@@ -334,15 +326,15 @@ Rust 支持常见的基本类型:
 而控制流语句可以让我们根据条件选择性地执行某段代码，或者重复执行某段代码，
 从而让程序拥有判断和循环的能力。
 
-### if/else 表达式
+### if/else 分支
 
-`if`/`else` 表达式是 Rust 中最常用的控制流语句。
+`if`/`else` 是 Rust 中最常用的控制流语句。
 
 它用于判断某个条件是否成立。
-它的表达式必须返回布尔值，而不是其他类型。
+它的判断条件必须返回布尔值，而不是其他类型。
 
-如果表达式成立，则执行 `if` 后面的代码块。
-如果表达式不成立，则执行 `else` 后面的代码块。
+如果判断条件成立，则执行 `if` 后面的代码块。
+如果判断条件不成立，则执行 `else` 后面的代码块。
 
 ```rust
   let mut content = String::from("default content");
@@ -364,3 +356,149 @@ Rust 支持常见的基本类型:
     String::from("default content")
   };
 ```
+
+以上代码意思是，如果 `len > 2` 条件成立，就使用 `args[2].clone()` 作为 `content` 的值。
+否则，就使用 `String::from("default content")` 作为 `content` 的值。
+
+### 循环
+
+Rust 中，循环方式如下：
+
+- `loop` 循环会一直执行，直到遇到 `break` 语句。
+- `while` 循环会在条件成立的情况下执行。
+- `for` 循环会遍历一个集合中的所有元素。
+
+我们将使用 `while` 实现一个交互式的命令行输入，逐步获取 Todo 的标题与内容，并确认是否创建该条 Todo。
+
+修改 `main.rs` 代码如下:
+
+```rust
+fn main() {
+  let mut inputs: Vec<String> = Vec::new();
+  let mut ok = args[1].clone() == "create";
+
+  while ok {
+    let len = inputs.len();
+
+    if len == 0 {
+      println!("Please input todo title");
+
+      let mut title = String::new();
+
+      std::io::stdin()
+        .read_line(&mut title)
+        .expect("read line failed");
+
+      if title.is_empty() {
+        continue;
+      }
+
+      inputs.push(title.trim().to_string());
+
+    } else if len == 1 {
+      println!("Please input todo content");
+
+      let mut content = String::new();
+
+      std::io::stdin()
+        .read_line(&mut content)
+        .expect("read line failed");
+
+      if content.is_empty() {
+        continue;
+      }
+
+      inputs.push(content.trim().to_string());
+    }
+
+    else {
+      println!("title:   [{}]", inputs[0].clone());
+      println!("content: [{}]", inputs[1].clone());
+      println!("Are you sure to create this todo? (y/n)");
+
+      let mut sure = String::new();
+
+      std::io::stdin()
+        .read_line(&mut sure)
+        .expect("read line failed");
+
+      if sure.trim().to_lowercase() != "n" {
+        ok = false;
+      }else{
+        inputs.clear();
+      }
+    }
+  }
+
+  let title = inputs[0].clone();
+  let content = inputs[1].clone();
+
+  println!("create todo title: {}, content: {}", title, content);
+}
+```
+
+以上代码中，我们使用了 `while` 循环来实现一个交互式，用于创建 Todo 项的命令行程序。
+
+我们使用了一个状态变量 `ok` 来控制循环，当 `ok` 为 `false` 时，循环会结束。
+并在用户输入的内容为空时，使用 `continue` 语句来跳过当前循环。
+
+如果改成 `loop` 循环的话如下所示:
+
+```rust
+loop {
+  // 其他地方保持不变
+
+  if sure.trim().to_lowercase() != "n" {
+    ok = false;
+  }else{
+    inputs.clear();
+  }
+
+  if !ok {
+    break
+  }
+}
+```
+
+`while` 和 `loop` 都可以用来循环，效果可以说是等价的。
+
+两者区别在于:
+
+- `while` 适合用于条件驱动的循环，比如获取用户输入并确认。
+- `loop` 则更适合结构复杂，需要手动控制循环的情况。例如游戏开发。
+
+现在，执行 `cargo run -- create` 就可以进入交互式界面来创建 Todo 项了。
+
+### for 循环
+
+`for` 循环常用于遍历一个数据集合。
+
+我们将为 CLI 程序增加一个 `list` 命令，用于列出所有的 Todo 项。
+
+修改 `main.rs` 如下：
+
+```rust
+fn main() {
+  let mut todos: Vec<String> = Vec::new();
+  todos.push(String::from("learn rust"));
+  todos.push(String::from("work"));
+  todos.push(String::from("play"));
+
+  let args: Vec<String> = std::env::args().collect();
+  let mut inputs: Vec<String> = Vec::new();
+
+  if args[1].clone() == "list" {
+    for todo in todos {
+      println!("todo title: {}", todo);
+    }
+    return;
+  }
+
+  let mut ok = args[1].clone() == "create";
+
+  // ...
+}
+```
+
+相较于需要手动管理索引的 `while` 和 `loop`, `for` 可以更简洁安全的遍历数据集合。
+是 Rust 中处理数据集合的首选方式。
