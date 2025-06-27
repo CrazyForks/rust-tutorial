@@ -892,6 +892,10 @@ cargo add serde --features derive     # 增加 serde 依赖, 并开启 derive �
 cargo add serde_json                  # 增加 serde_json 依赖
 ```
 
+> serde 是一个强大的序列化/反序列化库, 它支持多种格式, 包括 JSON、YAML 等。
+>
+> 而 serde_json 则是基于 JSON 格式的实现。
+
 ### 为结构体实现方法
 
 在 Rust 中, 我们可以使用 `impl` 关键字为结构体定义方法, 将结构体和它的行为组织在一起。
@@ -1031,3 +1035,200 @@ match args[1].as_str() {
 - 容易因拼写错误而出错, 缺乏类型保障。
 - 命令的参数结构难以统一组织和扩展。
 - 无法自动生成 --help 等提示信息。
+
+为解决此问题，我们将结合 Rust 的枚举和引入第三方库 `clap` 来构建维护性和扩展性更强的 CLI 程序。
+
+> clap 是一个强大的 Rust 库, 用于解析命令行参数。它支持自动生成命令行参数的帮助信息, 并支持丰富的参数类型和校验规则。
+
+在项目根目录执行命令:
+
+```bash
+cargo add clap --features derive # 增加依赖并启用 derive 功能
+```
+
+### 为什么使用枚举
+
+枚举，在各种编程语言中或多或少都有着它的身影。
+
+它的作用是用于表示一组有限的、互斥的可能取值，例如周一到周日，性别等。
+
+与其他语言的枚举相比，Rust 的枚举更加灵活和强大：
+
+- 支持每个变体携带不同的数据。
+- 可与模式匹配强结合，做复杂的控制流。
+- 可以和 `trait`、方法一起使用，实现丰富的抽象设计。
+
+这使得枚举天然适合表示 CLI 的命令结构：每个命令对应一个枚举变体，每个变体携带所需参数。
+
+### 声明枚举
+
+Rust 中的枚举使用 `enum` 关键字声明。
+
+```rust
+// src/todo/core.rs
+use clap::Subcommand;
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum TodoCommand {
+    /// Create a new todo item
+    Create,
+    /// List all todo items
+    List,
+}
+```
+
+以上代码定义了一个名为 `TodoCommand` 的枚举，它有两个枚举值，分别是 `Create` 和 `List`。
+我们使用了派生宏 `#[derive(Debug, Clone, Subcommand)]` 为枚举自动实现 `Debug`、`Clone` 和 `Subcommand` 三个特征。
+
+`Subcommand` 特征告诉 clap 该枚举对应一个子命令。
+
+### 解析命令行参数
+
+```rust
+//src/main.rs
+use crate::todo::storage::{read_todo_list, save_todo_list};
+use clap::Parser;
+use todo::core::TodoCommand;
+
+mod todo;
+
+#[derive(Debug, Parser)]
+#[command(version, about, long_about = "Todo Cli")]
+struct Program {
+    #[command(subcommand)]
+    pub command: TodoCommand,
+}
+
+fn main() {
+    let args = Program::parse();
+    let save_file = "todo.json";
+    let mut todos = read_todo_list(save_file);
+
+    match args.command {
+        TodoCommand::Create => todo::create::create_todo(&mut todos),
+        TodoCommand::List => todo::list::list_todo(&todos),
+    }
+
+    save_todo_list(save_file, &todos);
+}
+```
+
+以上代码中, 我们定义了一个 `Program` 结构体, 它有一个字段 `command` 用于接收子命令。
+
+`#[command(version, about, long_about = "Todo Cli")]` 告诉 clap 自动生成 --version 和 --help 两个参数。
+
+`#[command(subcommand)]` 告诉 clap 该字段对应一个子命令。
+
+运行 `cargo run -- --help` 可以看到自动生成的帮助信息:
+
+```bash
+Todo Cli
+
+Usage: cli.exe <COMMAND>
+
+Commands:
+  create  Create a new todo item
+  list    List all todo items
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+```
+
+### Rust 注释
+
+在上面的例子中，我们给 TodoCommand 的每个枚举项添加了文档注释。
+但是当我们运行 `--help` 时，注释内容却自动出现在帮助信息中。
+
+这可能让人疑惑：我们只是加了一些注释，为什么这些注释会出现在运行时输出的帮助信息里？
+
+这是因为在 Rust 中的注释有三种方式。
+
+```rust
+// 单行注释（不会被编译器解析）
+
+/*
+多行
+注释
+（也不会被编译器解析）
+*/
+
+/// 文档注释（会被编译器和工具识别）
+```
+
+我们用到的就是 `/// xxx` 即文档注释。它是编译器可识别的元信息。
+文档注释的内容会被编译器和第三方工具解析为注释对象的文档说明。
+
+`clap` 通过它的派生宏 `#[derive(Subcommand)]` 来在编译期间获取结构体和枚举的元信息，其中就有文档注释。
+因此, 文档注释的内容会出现在运行时输出的帮助信息里。
+
+### 枚举变体
+
+Rust 的枚举是支持携带数据的。
+
+改造 `TodoCommand`。
+
+```rust
+#[derive(Debug, Clone, Subcommand)]
+pub enum TodoCommand {
+    Create {
+        #[arg(short, long)]
+        title: String,
+        #[arg(short, long)]
+        content: String,
+    },
+    List,
+}
+```
+
+我们在 `Create` 枚举值中增加了两个字段 `title` 和 `content`。
+
+分别对应 `--title` 和 `--content` 参数。
+
+`#[arg(short, long)]` 告诉 clap 该字段对应一个参数, 并指定参数的短名称和长名称。
+
+执行 `cargo run -- create --help`，可以看到自动生成的帮助信息:
+
+```bash
+Create a new todo item
+
+Usage: cli.exe create --title <TITLE> --content <CONTENT>
+
+Options:
+  -t, --title <TITLE>
+  -c, --content <CONTENT>
+  -h, --help               Print help
+```
+
+修改 `create_todo` 方法。
+
+```rust
+pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
+    let mut inputs: Vec<String> = Vec::new();
+
+    if !title.is_empty() {
+        inputs.push(title);
+    }
+
+    if !content.is_empty() {
+        inputs.push(content);
+    }
+
+    let mut ok = inputs.len() == 0;
+    // ...
+}
+```
+
+修改 `main.rs`：
+
+```rust
+// ...
+  TodoCommand::Create { title, content } => todo::create::create_todo(&mut todos, title, content),
+// ...
+```
+
+随后，我们就可以使用 `cargo run -- create --title t --content c` 来创建 Todo 而不需要进入交互式界面了。

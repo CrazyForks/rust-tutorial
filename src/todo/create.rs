@@ -1,8 +1,17 @@
 use crate::todo::core::TodoItem;
 
-pub fn create_todo(todos: &mut Vec<TodoItem>) {
+pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
     let mut inputs: Vec<String> = Vec::new();
-    let mut ok = true;
+
+    if !title.is_empty() {
+        inputs.push(title);
+    }
+
+    if !content.is_empty() {
+        inputs.push(content);
+    }
+
+    let mut ok = inputs.len() == 0;
 
     while ok {
         let len = inputs.len();

@@ -1,6 +1,21 @@
-use super::storage::read_todo_list;
+use clap::Subcommand;
 use serde::{Deserialize, Serialize};
 use serde_json;
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum TodoCommand {
+    /// Create a new todo item
+    Create {
+        #[arg(short, long)]
+        title: String,
+        // #[arg(short, long, default_value = "empty content")]
+        // content: Option<String>,
+        #[arg(short, long)]
+        content: String,
+    },
+    /// List all todo items
+    List,
+}
 
 #[derive(Deserialize, Serialize)]
 pub struct TodoItem {
