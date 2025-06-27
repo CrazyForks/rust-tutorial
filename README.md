@@ -614,3 +614,55 @@ fn main() {
 在 `main` 函数中，我们用一个 `Vec<TodoItem>` 来保存多个 Todo 项，每个 Todo 项都是一个结构体实例。
 
 当匹配到 `"list"` 命令时，我们遍历 `todos` 列表，打印每个 Todo 的标题和内容，实现了简单的查看功能。
+
+## 函数
+
+在先前的代码中，我们定义了 `todos` 变量来存储 Todo 项，并逐个实例化 Todo 项然后添加到 `todos` 中。
+
+我们实例化 Todo 项的代码如下，可以看到，有些繁琐：
+
+```rust
+TodoItem {
+  title: "learn rust".to_string(),
+  content: "read rust book".to_string(),
+}
+```
+
+为了避免每次都写重复的转换和构造过程，我们可以使用 Rust 的函数。
+
+函数是一段可以被重复调用的代码块。用于完成特定的任务。可以：
+
+- 将某段功能独立出，从而进行复用，避免代码重复。
+- 通过函数名描述功能，让代码结构清晰，提升可读性。
+- 需要修改则只需要修改函数内部，并不会影响外部调用，增加了维护性和扩展性。
+- 通过传递不同参数，来改变函数内部走向，实现不同的功能。
+- 可以返回值，实现外部与内部交互。
+
+```rust
+fn create_todo_item(title: &str, content: &str) -> TodoItem {
+    TodoItem {
+        title: title.to_string(),
+        content: content.to_string(),
+    }
+}
+
+fn main() {
+  let mut todos: Vec<TodoItem> = Vec::new();
+  todos.push(create_todo_item("learn rust", "read rust book"));
+  todos.push(create_todo_item("work", "complete required"));
+  todos.push(create_todo_item("play", "play game"));
+
+  // ...
+}
+```
+
+在以上示例中，`create_todo_item` 接受两个 `&str` 类型的参数。返回 `TodoItem` 类型。
+在它内部，实现了将两个 `&str` 参数转换为 `String` 类型的值，并绑定到 `TodoItem` 类型的实例上。
+
+随后，我们只需要使用 `create_todo_item("title", "content");` 就可以实例化一个 `TodoItem` 类型了。
+
+相较于先前需要手动指定结构体类型、列出所有字段并逐一进行字符串转换的写法，使用函数可以大大减少重复代码，提升开发效率。
+
+通过封装 `create_todo_item` 函数，我们只需要传入标题和内容两个参数，就能快速创建一个 `TodoItem` 实例，既简洁，又易于阅读和维护。
+
+这样的封装方式在实际开发中非常常见，也体现了函数抽象的核心思想：隐藏实现细节，对外暴露清晰的接口。
