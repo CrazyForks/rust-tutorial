@@ -502,3 +502,68 @@ fn main() {
 
 相较于需要手动管理索引的 `while` 和 `loop`, `for` 可以更简洁安全的遍历数据集合。
 是 Rust 中处理数据集合的首选方式。
+
+## 模式匹配
+
+目前，我们的 CLI 程序包含两个命令：
+
+- `create`：创建 Todo 项；
+- `list`：查看 Todo 列表。
+
+但随着功能逐渐扩展，代码也逐渐变得臃肿、不易维护。
+
+为了解决这个问题，Rust 提供了一种更为优雅强大的方式，即模式匹配 `match`。
+
+我们可以使用 `match` 匹配输入内容，根据不同的匹配进行相应的逻辑。
+
+```rust
+fn main() {
+    let mut todos: Vec<String> = Vec::new();
+    todos.push(String::from("learn rust"));
+    todos.push(String::from("work"));
+    todos.push(String::from("play"));
+
+    let args: Vec<String> = std::env::args().collect();
+
+    match args[1].clone().as_str() {
+        "create" => {
+            let mut inputs: Vec<String> = Vec::new();
+            let mut ok = true;
+
+            // ...
+
+            println!("create todo title: {}, content: {}", title, content);
+        }
+        "list" => {
+            for todo in todos {
+                println!("todo title: {}", todo);
+            }
+        }
+        _ => {
+            println!("unknown command");
+        }
+    }
+}
+```
+
+通过以上代码，我们不难发现，`match` 很像其他语言中的 `switch`,
+但是 Rust 的 `match` 则相对于 `switch` 更加强大。它可以:
+
+- 匹配多种可能的值。
+- 支持变量绑定和解构。
+- 必须覆盖所有情况，但允许使用 `_` 匹配所有。
+- 它同时是表达式，可以返回值。
+- 支持守卫条件，可以使用 `if` 增加条件限制。
+
+下面是一个简单的示例:
+
+```rust
+let auth_level: i32 = 2;
+
+let role = match auth_level {   // 返回值给变量声明
+  0 => "Guest",                 // 单值匹配
+  1 | 2 => "User",              // 多值匹配
+  n if n >= 16 => "Admin",      // 守卫语句
+  _ => "Unknow"                 // 默认分支，匹配所有剩余情况
+}
+```
