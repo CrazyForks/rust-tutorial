@@ -291,21 +291,37 @@ fn main() {
 
 再次执行 `cargo run -- a`，成功运行。
 
-### 类型推断
+### 变量类型
 
 Rust 是一门强类型的语言，这意味着变量在编译时必须要有明确的类型。
 
-Rust 是类型后置的，通过在变量名称后面增加类型来指定变量类型。
-例如：`let args: Vec<String> = env::args().collect();`。
+类型确定方式有两种，分别是显式声明和隐式推断。
 
-不过，Rust 有着强大的类型推断机制，使得我们在大多数情况下，不需要手动标注类型。
+显式声明, 在变量名称后面使用 `:` 指定类型。
+例如：`let args: Vec<String> = env::args().collect();`。将变量 `args` 的类型指定为 `Vec<String>`。
+
+隐式推断, 编译器根据变量的值和上下文推断变量的类型。
+而 Rust 有着强大的类型推断机制，使得我们在大多数情况下，不需要手动标注类型。
 编译器会自动推断类型，只有当编译器无法推断类型时才需要手动标注。
 
 例如以下代码中，我们并未显式声明 `len`, `title` 或 `content` 的类型，但它们的类型仍然是确定的：
 
 ```rust
   let args: Vec<String> = env::args().collect();
-  let len = args.len();
-  let title = args[1].clone();
-  let mut content = String::from("default content");
+  let len /** usize */ = args.len();
+  let title /** String */ = args[1].clone();
+  let mut content /** String */ = String::from("default content");
 ```
+
+Rust 支持常见的基本类型:
+
+- 整型: `i8`, `i16`, `i32`, `i64`, `i128`, `isize`
+- 无符号整型: `u8`, `u16`, `u32`, `u64`, `u128`, `usize`
+- 浮点数: `f32`, `f64`
+- 布尔值: `bool`
+- 字符: `char`
+
+需要注意的是，Rust 中，`"xxx"` 是一个字符串字面量切片，类型为 `&str`，是在编译时就固定不可变的。
+而 `String` 是一个字符串类型，编译时动态分配，可变长度。
+
+我们在前面使用的 `args` 是 `Vec<String>`, 就是一个动态字符串的集合。
