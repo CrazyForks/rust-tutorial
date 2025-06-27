@@ -1,4 +1,6 @@
-pub fn create_todo() {
+use crate::todo::core::TodoItem;
+
+pub fn create_todo(todos: &mut Vec<TodoItem>) {
     let mut inputs: Vec<String> = Vec::new();
     let mut ok = true;
 
@@ -65,4 +67,6 @@ pub fn create_todo() {
     };
 
     println!("create todo title: {}, content: {}", title, content);
+
+    todos.push(TodoItem::new(title.as_str(), content.as_str()));
 }

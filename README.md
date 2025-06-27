@@ -860,3 +860,149 @@ fn main() {
     }
 }
 ```
+
+## 数据持久化
+
+目前，我们的任务数据是保存在内存中的。当程序退出时，这些数据会随之消失。
+
+为了让用户的数据在下次启动程序时依然可用，我们需要将数据持久化，也就是保存到磁盘上。
+
+一个简单且常见的做法是：将数据保存到一个文件中。程序启动时从文件中读取任务列表，退出或修改数据时再将更新后的任务保存回文件。
+
+要实现这一功能，我们需要先让数据支持序列化与反序列化。
+
+- 序列化是指将结构体等内存对象转换为可保存的格式。
+- 反序列化则是将这些格式转换回结构体对象。
+
+### 添加依赖
+
+在实际开发中，我们通常会将常用的一些功能给封装起来，方便后续重复使用。
+
+更进一步的就是将这些功能封装为一个库包给发布到网络中，让其他人也可以使用。
+如果项目中有用到某个库包，那么说明项目依赖于这个库包。这个库包就是项目的依赖。
+
+`cargo` 就是 Rust 的库包管理工具。我们可以通过它安装项目依赖库包。
+
+为了让 `TodoItem` 能被正确地序列化/反序列化, 我们需要引入第三方库 `Serde` 以及 `serde_json`。
+
+在项目根目录下执行命令:
+
+```bash
+cargo add serde --features derive     # 增加 serde 依赖，并开启 derive 功能
+cargo add serde_json                  # 增加 serde_json 依赖
+```
+
+### 为结构体实现方法
+
+在 Rust 中，我们可以使用 `impl` 关键字为结构体定义方法，将结构体和它的行为组织在一起。
+
+我们来为 `TodoItem` 添加创建、序列化和反序列化的方法：
+
+```rust
+// src/todo/core.rs
+use serde::{Deserialize, Serialize};
+use serde_json;
+
+#[derive(Deserialize, Serialize)]
+pub struct TodoItem {
+    pub title: String,
+    pub content: String,
+}
+
+impl TodoItem {
+    pub fn new(title: &str, content: &str) -> Self {
+        create_todo_item(title, content)
+    }
+
+    pub fn serializer(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    pub fn deserializer(s: &str) -> Self {
+        serde_json::from_str(s).unwrap()
+    }
+}
+```
+
+我们在结构体上添加了 `#[derive(Serialize, Deserialize)]` 派生宏，
+这会自动为 `TodoItem` 实现 `Serde` 所需的转换逻辑。避免了手动实现的复杂性。
+
+此外，我们还添加了：
+
+- `new` 方法：用于创建一个新的 `TodoItem`，现在可以直接用 `TodoItem::new(...)` 替代之前的 `create_todo_item(...)`。
+- `serializer` 方法：将当前实例转换为 JSON 字符串。
+- `deserializer` 方法：从 JSON 字符串还原为 `TodoItem` 实例。
+
+通过这种方式，我们就为 `TodoItem` 实现了基本的序列化与反序列化功能。接下来，我们就可以在程序中使用文件来保存和读取任务数据了。
+
+### 文件操作
+
+现在，我们已经实现了 `TodoItem` 的序列化和反序列化。接下来，我们需要将数据存储到文件中，实现持久化。
+
+Rust 提供了标准库 `std::fs` 用于文件读写。我们将使用它实现以下两个功能：
+
+- 保存 Todo 列表到文件。
+- 读取 Todo 列表到程序。
+
+增加 `src/todo/storage.rs` 文件，并在 `src/todo.rs` 中声明并公开该模块。
+
+```rust
+// src/todo/storage.rs
+use super::core::TodoItem;
+use std::fs;
+
+pub fn read_todo_list(save_file: &str) -> Vec<TodoItem> {
+    let mut result: Vec<TodoItem> = Vec::new();
+
+    if let Ok(content) = fs::read_to_string(save_file) {
+        if let Ok(mut list) = serde_json::from_str(content.as_str()) {
+            result.append(&mut list)
+        }
+    };
+
+    // 如果没有读取到任何数据，提供默认示例
+    if result.len() == 0 {
+        result.push(TodoItem::new("learn rust", "read rust book"));
+        result.push(TodoItem::new("work", "complete required"));
+        result.push(TodoItem::new("play", "play game"));
+    }
+
+    return result;
+}
+
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
+    fs::write(save_file, serde_json::to_string(todos).unwrap()).unwrap();
+}
+```
+
+```rust
+// src/main.rs
+use crate::todo::storage::{read_todo_list, save_todo_list};
+
+mod todo;
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let save_file = "todo.json";
+    let mut todos = read_todo_list(save_file);
+
+    match args[1].clone().as_str() {
+        "create" => todo::create::create_todo(&mut todos),
+        "list" => todo::list::list_todo(&todos),
+        _ => {
+            println!("unknown command");
+        }
+    }
+
+    save_todo_list(save_file, &todos);
+}
+```
+
+这样，当我们执行以下命令时：
+
+```bash
+cargo run -- list    # 显示 Todo 列表（包括初始默认内容）
+cargo run -- create  # 添加 Todo 项（修改会被保存）
+```
+
+数据将自动从 `todo.json` 读取并写入，实现完整的本地持久化。
