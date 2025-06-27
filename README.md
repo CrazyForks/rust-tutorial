@@ -666,3 +666,197 @@ fn main() {
 通过封装 `create_todo_item` 函数，我们只需要传入标题和内容两个参数，就能快速创建一个 `TodoItem` 实例，既简洁，又易于阅读和维护。
 
 这样的封装方式在实际开发中非常常见，也体现了函数抽象的核心思想：隐藏实现细节，对外暴露清晰的接口。
+
+## 模块化
+
+随着程序逐渐复杂, 我们的 `main.rs` 文件中的代码越来越多，所有的逻辑都堆在一起，不仅可读性差，也不利于维护和扩展。
+
+在 Rust 中，模块化是一种常见的代码组织方式。通过将代码拆分成多个文件，让每个文件负责不同的功能。
+可以让代码结构更加清晰，职责划分明确。
+
+目前，我们的项目结构如下:
+
+```bash
+|- src/
+  |- main.rs
+```
+
+新建一些文件，项目结构如下：
+
+```bash
+|- src/
+  |- todo/        # todo 模块目录
+    |- core.rs    # todo 核心逻辑
+    |- create.rs  # create todo 命令
+    |- list.rs    # list todo 命令
+  |- main.rs      # 程序入口
+  |- todo.rs      # 子模块声明
+```
+
+### 访问修饰符
+
+```rust
+// src/todo/core.rs
+pub struct TodoItem {
+    pub title: String,
+    pub content: String,
+}
+
+pub fn create_todo_item(title: &str, content: &str) -> TodoItem {
+    TodoItem {
+        title: title.to_string(),
+        content: content.to_string(),
+    }
+}
+
+pub fn get_todo_list() -> Vec<TodoItem> {
+    let mut todos: Vec<TodoItem> = Vec::new();
+
+    todos.push(create_todo_item("learn rust", "read rust book"));
+    todos.push(create_todo_item("work", "complete required"));
+    todos.push(create_todo_item("play", "play game"));
+
+    return todos;
+}
+```
+
+在以上代码中，我们可以看见，不论是结构体还是函数，在声明前面都有着一个 `pub` 关键字。`pub` 表示该结构体或函数是公开的，其他模块可以访问。
+
+Rust 中，默认所有内容都是私有的，如果不添加 `pub`，则该内容只能在当前模块中访问。
+
+```rust
+// src/todo/create.rs
+pub fn create_todo() {
+    let mut inputs: Vec<String> = Vec::new();
+    let mut ok = true;
+
+    while ok {
+        let len = inputs.len();
+
+        if len == 0 {
+            println!("Please input todo title");
+
+            let mut title = String::new();
+
+            std::io::stdin()
+                .read_line(&mut title)
+                .expect("read line failed");
+
+            if title.is_empty() {
+                continue;
+            }
+
+            inputs.push(title.trim().to_string());
+        } else if len == 1 {
+            println!("Please input todo content");
+
+            let mut content = String::new();
+
+            std::io::stdin()
+                .read_line(&mut content)
+                .expect("read line failed");
+
+            if content.is_empty() {
+                continue;
+            }
+
+            inputs.push(content.trim().to_string());
+        } else {
+            println!("title:   [{}]", inputs[0].clone());
+            println!("content: [{}]", inputs[1].clone());
+            println!("Are you sure to create this todo? (y/n)");
+
+            let mut sure = String::new();
+            std::io::stdin()
+                .read_line(&mut sure)
+                .expect("read line failed");
+
+            if sure.trim().to_lowercase() != "n" {
+                ok = false;
+            } else {
+                inputs.clear();
+            }
+        }
+    }
+
+    let inputs_len = inputs.len();
+
+    let title = if inputs_len > 0 {
+        inputs[0].clone()
+    } else {
+        String::from("default title")
+    };
+    let content = if inputs_len > 1 {
+        inputs[1].clone()
+    } else {
+        String::from("default content")
+    };
+
+    println!("create todo title: {}, content: {}", title, content);
+}
+```
+
+### 模块路径解析
+
+```rust
+// src/todo/list.rs
+use super::core::TodoItem;
+
+pub fn list_todo(todos: &Vec<TodoItem>) {
+    for todo in todos {
+        println!("todo title: {}, content: {}", todo.title, todo.content);
+    }
+}
+```
+
+在以上代码中，可以看见 `use super::core::TodoItem;` 这行语句。
+这是在引用其他模块的内容。
+
+Rust 使用类型文件夹路径的方式来引用不同的模块内容，并提供了三种路径前缀：
+
+- `super`, 表示当前模块的父模块。
+- `self`, 表示当前模块自身。
+- `crate`, 表示当前根模块，即 `src` 目录。
+
+回到 `use super::core::TodoItem;`, 我们可以得知它的作用是引用 `list` 模块的父模块下的子模块 `core` 的 `TodoItem` 并使用它。
+换句话说，它的作用是从兄弟模块 `core` 引入 `TodoItem` 并使用。
+
+> 引用的内容必须使用 `pub` 关键字公开，否则无法引用。
+
+### 模块声明
+
+```rust
+// src/todo.rs
+pub mod core;
+pub mod create;
+pub mod list;
+```
+
+我们可以使用 `mod` 关键字来声明子模块。同样的，子模块需要 `pub` 关键字修饰来公开给外部访问。
+
+在 Rust 中，每个模块都有一个 `mod.rs` 文件，该文件是模块的入口文件。
+在 `mod.rs` 文件中，我们可以定义模块的公开内容，如结构体、函数、模块等。
+
+如果使用的 `rustc` 版本在 1.30 以前，那么这是唯一声明模块入口的方法。
+
+但如果实在 1.30 以后，那么可以在模块同级位置创建一个同名的 `.rs` 文件来作为模块入口声明。
+
+这里使用的就是使用与模块同名的 `.rs` 文件作为模块入口声明。
+
+```rust
+// src/main.rs
+mod todo;
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let todos = todo::core::get_todo_list();
+
+    match args[1].clone().as_str() {
+        "create" => todo::create::create_todo(),
+        "list" => todo::list::list_todo(&todos),
+        _ => {
+            println!("unknown command");
+        }
+    }
+}
+```
