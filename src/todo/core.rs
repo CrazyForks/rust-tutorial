@@ -7,11 +7,11 @@ pub enum TodoCommand {
     /// Create a new todo item
     Create {
         #[arg(short, long)]
-        title: String,
+        title: Option<String>,
         // #[arg(short, long, default_value = "empty content")]
         // content: Option<String>,
         #[arg(short, long)]
-        content: String,
+        content: Option<String>,
     },
     /// List all todo items
     List,

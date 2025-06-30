@@ -1,14 +1,24 @@
 use crate::todo::core::TodoItem;
 
-pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
+pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
     let mut inputs: Vec<String> = Vec::new();
 
-    if !title.is_empty() {
-        inputs.push(title);
+    match title {
+        Some(title) => {
+            if !title.is_empty() {
+                inputs.push(title);
+            }
+        }
+        _ => {}
     }
 
-    if !content.is_empty() {
-        inputs.push(content);
+    match content {
+        Some(content) => {
+            if !content.is_empty() {
+                inputs.push(content);
+            }
+        }
+        _ => {}
     }
 
     let mut ok = inputs.len() == 0;

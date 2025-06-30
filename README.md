@@ -1232,3 +1232,112 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
 ```
 
 随后，我们就可以使用 `cargo run -- create --title t --content c` 来创建 Todo 而不需要进入交互式界面了。
+
+### 可选参数
+
+目前，我们的 `create` 命令的参数都是必填的。
+但是这样我们没法区分到底是使用命令行参数还是交互式界面来创建 Todo 项。
+
+因此我们需要使用可选参数。
+
+Rust 提供了一个 `Option<T>` 类型的枚举。
+
+```rust
+pub enum Option<T> {
+    None,
+    Some(T),
+}
+```
+
+可以看见，枚举 `Option<T>` 就有两个枚举值。分别是 `Some(T)` 和 `None`，分别代表有值和无值。
+
+将 `TodoCommand` 枚举改为如下内容:
+
+```rust
+#[derive(Debug, Clone, Subcommand)]
+pub enum TodoCommand {
+    /// Create a new todo item
+    Create {
+        #[arg(short, long)]
+        title: Option<String>,
+        #[arg(short, long)]
+        content: Option<String>,
+    },
+    /// List all todo items
+    List,
+}
+```
+
+随后修改 `create_todo` 方法。
+
+```rust
+pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
+    let mut inputs: Vec<String> = Vec::new();
+
+    match title {
+        Some(title) => {
+            if !title.is_empty() {
+                inputs.push(title);
+            }
+        }
+        _ => {}
+    }
+
+    match content {
+        Some(content) => {
+            if !content.is_empty() {
+                inputs.push(content);
+            }
+        }
+        _ => {}
+    }
+    // ...
+```
+
+改造完毕后，我们的 `create` 命令可以不指定参数进入交互式界面创建 Todo，也可以指定参数直接创建 Todo 了。
+
+在前面的例子中，我们使用了 `Option<String>` 来表示将参数变得可选。
+那么，`Option<T>` 中的 `T` 是从哪里来的？为什么我们只需要将 `T` 替换为 `String`，就能让参数变得可选？
+
+因为这里的 `T` 是一个泛型。它并不是某个具体的值，而是作为一个占位符被用来指代一个将来会具体指定的类型。
+
+Rust 是一门静态类型语言，拥有强大而灵活的类型系统。
+为了保证类型安全，Rust 要求在编译期间就确定所有变量和参数的类型。
+这虽然增强了代码的可靠性，但也带来了一个问题：我们往往需要为不同的类型编写大量结构相似但类型不同的代码。
+
+例如翻转一个元组，如果不使用泛型，将是这样的。
+
+```rust
+fn reverse_i8_tuple(tuple: (i8, i8)) -> (i8, i8) {
+    let (a, b) = tuple;
+    return (b, a);
+}
+
+fn reverse_u8_tuple(tuple: (u8, u8)) -> (u8, u8) {
+    let (a, b) = tuple;
+    return (b, a);
+}
+```
+
+为了解决类型重复的问题，许多静态类型语言都引入了**泛型（Generics）**这一机制，Rust 也不例外。
+泛型允许我们编写与具体类型无关的通用代码，从而在保持类型安全的同时避免重复劳动。
+
+当我们将 `String` 传入 `Option<T>`， `Option<T>` 就变成了 `Option<String>`。`T` 从一个广泛的类型收缩为一个明确的 `String` 类型。
+
+我们需要为每个类型单独实现一个方法。
+
+但如果使用泛型，将是这样的:
+
+```rust
+fn reverse<T>(args: (T, T)) -> (T, T) {
+    let (a, b) = args;
+    return (b, a);
+}
+```
+
+于是，我们就可以使用 `reverse` 方法来翻转任意类型的元组了。
+
+```rust
+let a = reverse((1, 2));
+let b = reverse(("a", "b"));
+```
