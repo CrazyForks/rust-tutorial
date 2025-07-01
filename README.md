@@ -47,7 +47,7 @@ cargo init Project # 当前目录下新建一个 Project 目录
 
 ```rust
 fn main() {
-    println!("Hello, world!");
+  println!("Hello, world!");
 }
 ```
 
@@ -97,9 +97,9 @@ fn main() {
 
 ```bash
 [
-    "target\\debug\\cli.exe",
-    "a",
-    "b",
+  "target\\debug\\cli.exe",
+  "a",
+  "b",
 ]
 ```
 
@@ -518,31 +518,31 @@ fn main() {
 
 ```rust
 fn main() {
-    let mut todos: Vec<String> = Vec::new();
-    todos.push(String::from("learn rust"));
-    todos.push(String::from("work"));
-    todos.push(String::from("play"));
+  let mut todos: Vec<String> = Vec::new();
+  todos.push(String::from("learn rust"));
+  todos.push(String::from("work"));
+  todos.push(String::from("play"));
 
-    let args: Vec<String> = std::env::args().collect();
+  let args: Vec<String> = std::env::args().collect();
 
-    match args[1].clone().as_str() {
-        "create" => {
-            let mut inputs: Vec<String> = Vec::new();
-            let mut ok = true;
+  match args[1].clone().as_str() {
+    "create" => {
+      let mut inputs: Vec<String> = Vec::new();
+      let mut ok = true;
 
-            // ...
+      // ...
 
-            println!("create todo title: {}, content: {}", title, content);
-        }
-        "list" => {
-            for todo in todos {
-                println!("todo title: {}", todo);
-            }
-        }
-        _ => {
-            println!("unknown command");
-        }
+      println!("create todo title: {}, content: {}", title, content);
     }
+    "list" => {
+      for todo in todos {
+        println!("todo title: {}", todo);
+      }
+    }
+    _ => {
+      println!("unknown command");
+    }
+  }
 }
 ```
 
@@ -580,31 +580,31 @@ let role = match auth_level {   // 返回值给变量声明
 
 ```rust
 struct TodoItem {
-    title: String,
-    content: String,
+  title: String,
+  content: String,
 }
 
 fn main() {
   let mut todos: Vec<TodoItem> = Vec::new();
   todos.push(TodoItem {
-      title: "learn rust".to_string(),
-      content: "read rust book".to_string(),
+    title: "learn rust".to_string(),
+    content: "read rust book".to_string(),
   });
   todos.push(TodoItem {
-      title: "work".to_string(),
-      content: "complete required".to_string(),
+    title: "work".to_string(),
+    content: "complete required".to_string(),
   });
   todos.push(TodoItem {
-      title: "play".to_string(),
-      content: "play game".to_string(),
+    title: "play".to_string(),
+    content: "play game".to_string(),
   });
 
   // ...
-        "list" => {
-            for todo in todos {
-                println!("todo title: {}, content: {}", todo.title, todo.content);
-            }
-        }
+  "list" => {
+    for todo in todos {
+      println!("todo title: {}, content: {}", todo.title, todo.content);
+    }
+  }
   // ...
 }
 ```
@@ -640,10 +640,10 @@ TodoItem {
 
 ```rust
 fn create_todo_item(title: &str, content: &str) -> TodoItem {
-    TodoItem {
-        title: title.to_string(),
-        content: content.to_string(),
-    }
+  TodoItem {
+    title: title.to_string(),
+    content: content.to_string(),
+  }
 }
 
 fn main() {
@@ -698,25 +698,25 @@ fn main() {
 ```rust
 // src/todo/core.rs
 pub struct TodoItem {
-    pub title: String,
-    pub content: String,
+  pub title: String,
+  pub content: String,
 }
 
 pub fn create_todo_item(title: &str, content: &str) -> TodoItem {
-    TodoItem {
-        title: title.to_string(),
-        content: content.to_string(),
-    }
+  TodoItem {
+    title: title.to_string(),
+    content: content.to_string(),
+  }
 }
 
 pub fn get_todo_list() -> Vec<TodoItem> {
-    let mut todos: Vec<TodoItem> = Vec::new();
+  let mut todos: Vec<TodoItem> = Vec::new();
 
-    todos.push(create_todo_item("learn rust", "read rust book"));
-    todos.push(create_todo_item("work", "complete required"));
-    todos.push(create_todo_item("play", "play game"));
+  todos.push(create_todo_item("learn rust", "read rust book"));
+  todos.push(create_todo_item("work", "complete required"));
+  todos.push(create_todo_item("play", "play game"));
 
-    return todos;
+  return todos;
 }
 ```
 
@@ -803,9 +803,9 @@ pub fn create_todo() {
 use super::core::TodoItem;
 
 pub fn list_todo(todos: &Vec<TodoItem>) {
-    for todo in todos {
-        println!("todo title: {}, content: {}", todo.title, todo.content);
-    }
+  for todo in todos {
+    println!("todo title: {}, content: {}", todo.title, todo.content);
+  }
 }
 ```
 
@@ -848,16 +848,16 @@ pub mod list;
 mod todo;
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let todos = todo::core::get_todo_list();
+  let args: Vec<String> = std::env::args().collect();
+  let todos = todo::core::get_todo_list();
 
-    match args[1].clone().as_str() {
-        "create" => todo::create::create_todo(),
-        "list" => todo::list::list_todo(&todos),
-        _ => {
-            println!("unknown command");
-        }
+  match args[1].clone().as_str() {
+    "create" => todo::create::create_todo(),
+    "list" => todo::list::list_todo(&todos),
+    _ => {
+        println!("unknown command");
     }
+  }
 }
 ```
 
@@ -909,22 +909,22 @@ use serde_json;
 
 #[derive(Deserialize, Serialize)]
 pub struct TodoItem {
-    pub title: String,
-    pub content: String,
+  pub title: String,
+  pub content: String,
 }
 
 impl TodoItem {
-    pub fn new(title: &str, content: &str) -> Self {
-        create_todo_item(title, content)
-    }
+  pub fn new(title: &str, content: &str) -> Self {
+    create_todo_item(title, content)
+  }
 
-    pub fn serializer(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
+  pub fn serializer(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
 
-    pub fn deserializer(s: &str) -> Self {
-        serde_json::from_str(s).unwrap()
-    }
+  pub fn deserializer(s: &str) -> Self {
+    serde_json::from_str(s).unwrap()
+  }
 }
 ```
 
@@ -956,28 +956,28 @@ use super::core::TodoItem;
 use std::fs;
 
 pub fn read_todo_list(save_file: &str) -> Vec<TodoItem> {
-    let mut result: Vec<TodoItem> = Vec::new();
+  let mut result: Vec<TodoItem> = Vec::new();
 
-    match fs::read_to_string(save_file) {
-        Ok(content) => match serde_json::from_str(content.as_str()) {
-            Ok(mut list) => result.append(&mut list),
-            _ => {
-                println!("parse file error");
-            }
-        },
-        _ => {
-            println!("read file error");
-        }
+  match fs::read_to_string(save_file) {
+    Ok(content) => match serde_json::from_str(content.as_str()) {
+      Ok(mut list) => result.append(&mut list),
+      _ => {
+        println!("parse file error");
+      }
+    },
+    _ => {
+      println!("read file error");
     }
+  }
 
-    // 如果没有读取到任何数据, 提供默认示例
-    if result.len() == 0 {
-        result.push(TodoItem::new("learn rust", "read rust book"));
-        result.push(TodoItem::new("work", "complete required"));
-        result.push(TodoItem::new("play", "play game"));
-    }
+  // 如果没有读取到任何数据, 提供默认示例
+  if result.len() == 0 {
+    result.push(TodoItem::new("learn rust", "read rust book"));
+    result.push(TodoItem::new("work", "complete required"));
+    result.push(TodoItem::new("play", "play game"));
+  }
 
-    return result;
+  return result;
 }
 
 pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
@@ -992,19 +992,19 @@ use crate::todo::storage::{read_todo_list, save_todo_list};
 mod todo;
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let save_file = "todo.json";
-    let mut todos = read_todo_list(save_file);
+  let args: Vec<String> = std::env::args().collect();
+  let save_file = "todo.json";
+  let mut todos = read_todo_list(save_file);
 
-    match args[1].clone().as_str() {
-        "create" => todo::create::create_todo(&mut todos),
-        "list" => todo::list::list_todo(&todos),
-        _ => {
-            println!("unknown command");
-        }
+  match args[1].clone().as_str() {
+    "create" => todo::create::create_todo(&mut todos),
+    "list" => todo::list::list_todo(&todos),
+    _ => {
+      println!("unknown command");
     }
+  }
 
-    save_todo_list(save_file, &todos);
+  save_todo_list(save_file, &todos);
 }
 ```
 
@@ -1023,9 +1023,9 @@ cargo run -- create  # 添加 Todo 项（修改会被保存）
 
 ```rust
 match args[1].as_str() {
-    "create" => { ... }
-    "list" => { ... }
-    _ => println!("unknown command"),
+  "create" => { ... }
+  "list" => { ... }
+  _ => println!("unknown command"),
 }
 ```
 
@@ -1070,10 +1070,10 @@ use clap::Subcommand;
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum TodoCommand {
-    /// Create a new todo item
-    Create,
-    /// List all todo items
-    List,
+  /// Create a new todo item
+  Create,
+  /// List all todo items
+  List,
 }
 ```
 
@@ -1095,21 +1095,21 @@ mod todo;
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = "Todo Cli")]
 struct Program {
-    #[command(subcommand)]
-    pub command: TodoCommand,
+  #[command(subcommand)]
+  pub command: TodoCommand,
 }
 
 fn main() {
-    let args = Program::parse();
-    let save_file = "todo.json";
-    let mut todos = read_todo_list(save_file);
+  let args = Program::parse();
+  let save_file = "todo.json";
+  let mut todos = read_todo_list(save_file);
 
-    match args.command {
-        TodoCommand::Create => todo::create::create_todo(&mut todos),
-        TodoCommand::List => todo::list::list_todo(&todos),
-    }
+  match args.command {
+    TodoCommand::Create => todo::create::create_todo(&mut todos),
+    TodoCommand::List => todo::list::list_todo(&todos),
+  }
 
-    save_todo_list(save_file, &todos);
+  save_todo_list(save_file, &todos);
 }
 ```
 
@@ -1175,13 +1175,13 @@ Rust 的枚举是支持携带数据的。
 ```rust
 #[derive(Debug, Clone, Subcommand)]
 pub enum TodoCommand {
-    Create {
-        #[arg(short, long)]
-        title: String,
-        #[arg(short, long)]
-        content: String,
-    },
-    List,
+  Create {
+    #[arg(short, long)]
+    title: String,
+    #[arg(short, long)]
+    content: String,
+  },
+  List,
 }
 ```
 
@@ -1208,18 +1208,18 @@ Options:
 
 ```rust
 pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
-    let mut inputs: Vec<String> = Vec::new();
+  let mut inputs: Vec<String> = Vec::new();
 
-    if !title.is_empty() {
-        inputs.push(title);
-    }
+  if !title.is_empty() {
+    inputs.push(title);
+  }
 
-    if !content.is_empty() {
-        inputs.push(content);
-    }
+  if !content.is_empty() {
+    inputs.push(content);
+  }
 
-    let mut ok = inputs.len() == 0;
-    // ...
+  let mut ok = inputs.len() == 0;
+  // ...
 }
 ```
 
@@ -1248,8 +1248,8 @@ Rust 提供了一个 `Option<T>` 类型的枚举。
 
 ```rust
 pub enum Option<T> {
-    None,
-    Some(T),
+  None,
+  Some(T),
 }
 ```
 
@@ -1260,15 +1260,15 @@ pub enum Option<T> {
 ```rust
 #[derive(Debug, Clone, Subcommand)]
 pub enum TodoCommand {
-    /// Create a new todo item
-    Create {
-        #[arg(short, long)]
-        title: Option<String>,
-        #[arg(short, long)]
-        content: Option<String>,
-    },
-    /// List all todo items
-    List,
+  /// Create a new todo item
+  Create {
+    #[arg(short, long)]
+    title: Option<String>,
+    #[arg(short, long)]
+    content: Option<String>,
+  },
+  /// List all todo items
+  List,
 }
 ```
 
@@ -1276,29 +1276,31 @@ pub enum TodoCommand {
 
 ```rust
 pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
-    let mut inputs: Vec<String> = Vec::new();
+  let mut inputs: Vec<String> = Vec::new();
 
-    match title {
-        Some(arg_title) => {
-            if !arg_title.is_empty() {
-                inputs.push(arg_title);
-            }
-        }
-        _ => {}
+  match title {
+    Some(arg_title) => {
+      if !arg_title.is_empty() {
+        inputs.push(arg_title);
+      }
     }
+    _ => {}
+  }
 
-    match content {
-        Some(arg_content) => {
-            if !arg_content.is_empty() {
-                inputs.push(arg_content);
-            }
-        }
-        _ => {}
+  match content {
+    Some(arg_content) => {
+      if !arg_content.is_empty() {
+        inputs.push(arg_content);
+      }
     }
-    // ...
+    _ => {}
+  }
+  // ...
 ```
 
 改造完毕后，我们的 `create` 命令可以不指定参数进入交互式界面创建 Todo，也可以指定参数直接创建 Todo 了。
+
+### 泛型
 
 在前面的例子中，我们使用了 `Option<String>` 来表示将参数变得可选。
 那么，`Option<T>` 中的 `T` 是从哪里来的？为什么我们只需要将 `T` 替换为 `String`，就能让参数变得可选？
@@ -1313,13 +1315,13 @@ Rust 是一门静态类型语言，拥有强大而灵活的类型系统。
 
 ```rust
 fn reverse_i8_tuple(tuple: (i8, i8)) -> (i8, i8) {
-    let (a, b) = tuple;
-    return (b, a);
+  let (a, b) = tuple;
+  return (b, a);
 }
 
 fn reverse_u8_tuple(tuple: (u8, u8)) -> (u8, u8) {
-    let (a, b) = tuple;
-    return (b, a);
+  let (a, b) = tuple;
+  return (b, a);
 }
 ```
 
@@ -1330,12 +1332,12 @@ fn reverse_u8_tuple(tuple: (u8, u8)) -> (u8, u8) {
 
 我们需要为每个类型单独实现一个方法。
 
-但如果使用泛型，将是这样的:
+但如果使用泛型，在需要泛型的内容后面追加一个 `<T>` 即可:
 
 ```rust
 fn reverse<T>(args: (T, T)) -> (T, T) {
-    let (a, b) = args;
-    return (b, a);
+  let (a, b) = args;
+  return (b, a);
 }
 ```
 
@@ -1346,18 +1348,30 @@ let a = reverse((1, 2));
 let b = reverse(("a", "b"));
 ```
 
+需要注意的是，`T` 并不是固定的名称，只是约定成俗将泛型参数命名为 `T`。
+只要开发者愿意，那么将泛型可以是任何符合变量命名规则的名称。
+
+下面的示例展示了如何使用多个自定义命名的泛型参数：
+
+```rust
+fn reverse<Rust_1, Rust_2>(args: (Rust_1, Rust_2)) -> (Rust_2, Rust_1) {
+  let (a, b) = args;
+  return (b, a);
+}
+```
+
 ### if let
 
 在前面的代码中，我们对可选参数进行了模式匹配。
 
 ```rust
 match title {
-    Some(arg_title) => {
-        if !arg_title.is_empty() {
-            inputs.push(arg_title);
-        }
+  Some(arg_title) => {
+    if !arg_title.is_empty() {
+      inputs.push(arg_title);
     }
-    _ => {}
+  }
+  _ => {}
 }
 ```
 
@@ -1369,20 +1383,20 @@ Rust 提供了一个 `if let` 语法糖，用来匹配并解构某个特定的�
 
 ```rust
 pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
-    let mut inputs: Vec<String> = Vec::new();
+  let mut inputs: Vec<String> = Vec::new();
 
-    if let Some(arg_title) = title {
-        if !arg_title.is_empty() {
-            inputs.push(arg_title);
-        }
+  if let Some(arg_title) = title {
+    if !arg_title.is_empty() {
+      inputs.push(arg_title);
     }
+  }
 
-    if let Some(arg_content) = content {
-        if !arg_content.is_empty() {
-            inputs.push(arg_content);
-        }
+  if let Some(arg_content) = content {
+    if !arg_content.is_empty() {
+      inputs.push(arg_content);
     }
-    // ...
+  }
+  // ...
 ```
 
 这段代码的意思是如果 `title` 可以匹配出 `Some(arg_title)`，则将 `arg_title` 解构出并判断是否为空。
