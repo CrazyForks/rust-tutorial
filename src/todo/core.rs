@@ -38,11 +38,42 @@ impl TodoItem {
         create_todo_item(title, content)
     }
 
-    pub fn serializer(&self) -> String {
+    // pub fn serializer(&self) -> String {
+    //     serde_json::to_string(self).unwrap()
+    // }
+
+    // pub fn deserializer(s: &str) -> Self {
+    //     serde_json::from_str(s).unwrap()
+    // }
+}
+
+// pub trait Serializer
+// where
+//     Self: Sized + Serialize + for<'de> Deserialize<'de>,
+// {
+//     fn serialize(&self) -> String {
+//         serde_json::to_string(self).unwrap()
+//     }
+
+//     fn deserialize<S: Into<String>>(s: S) -> Self {
+//         let raw: String = s.into();
+//         serde_json::from_str(&raw).unwrap()
+//     }
+// }
+
+// impl Serializer for TodoItem {}
+
+pub trait Serializer
+where
+    Self: Sized + Serialize + for<'a> Deserialize<'a>,
+{
+    fn serialize(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
-    pub fn deserializer(s: &str) -> Self {
-        serde_json::from_str(s).unwrap()
+    fn deserialize<S: Into<String>>(s: S) -> Self {
+        serde_json::from_str(&s.into()).unwrap()
     }
 }
+
+impl Serializer for TodoItem {}

@@ -939,6 +939,18 @@ impl TodoItem {
 
 通过这种方式, 我们就为 `TodoItem` 实现了基本的序列化与反序列化功能。接下来, 我们就可以在程序中使用文件来保存和读取任务数据了。
 
+### self 和 Self
+
+在上方代码中，我们可以在结构体实例函数的参数处看见 `self` 关键字。
+它表示当前实例。相当于其他语言中的 `this`, `self`。
+
+我们可以通过 `self.title`, `self.content` 这样的方式来访问当前实例属性。
+
+除此之外，它与其他参数并没有什么区别。
+
+而 `Self` 则表示当前类型。等价于直接使用类型名称。
+但可以在类型重命名等情况下保持代码不变，使得代码更具有稳定性和可读性。
+
 ### 文件操作
 
 现在, 我们已经实现了 `TodoItem` 的序列化和反序列化。接下来, 我们需要将数据存储到文件中, 实现持久化。
@@ -1581,3 +1593,358 @@ pub fn list_todo(todos: &Vec<TodoItem>, title: Option<String>, content: Option<S
 ```
 
 现在，当我们执行 `cargo run -- list` 命令时，可以携带 `--title` 和 `--content` 参数进行筛选了。
+
+## 特征
+
+在为 `list` 命令实现 `set_title` 和 `set_content` 方法时，我们使用了 `Into<String>` 进行类型约束。
+但 `Into<T>` 并非是类型，它是一个特征, 是 Rust 用于定义行为约定的一种机制。可以为类型定义统一的能力规范。
+
+我们可以将 Rust 中的特征看作是其他语言中的接口。
+
+Rust 内置了许多特征。例如 `Into<T>` 表示可以将类型转换为 `T`。`From<T>` 表示可以从 `T` 构造出某个类型。
+`Copy` 和 `Clone` 可以表示一个类型是否可以被复制等等。
+
+在最开始我们编写程序时就遇到过一个涉及特征的错误。
+`String` 类型没有实现 `Copy` 特征，因此无法直接将参数赋值。
+
+```bash
+6 |   let title = args[1];
+  |               ^^^^^^^ move occurs because value has type `String`, which does not implement the `Copy` trait
+```
+
+### 声明特征
+
+特征的声明使用 `trait` 关键字。
+
+```rust
+trait PrintName {
+  fn PrintName(&self) -> String;
+}
+```
+
+与枚举一样，特征只要使用了 `pub` 修饰，那么它的方法就全部可供外部访问。
+
+### 实现特征
+
+特征的实现依赖于类型。在原先的为类型实现方法的基础上增加实现的特征名称和 `for` 关键字。
+
+```rust
+trait PrintName {
+  fn PrintName(&self) -> String;
+}
+
+impl PrintName for TodoItem {
+  fn PrintName(&self) -> String {
+    "TodoItem".to_string()
+  }
+}
+```
+
+如果觉得每个类型都要实现一遍 `PrintName` 特征太麻烦，也可以为特征定义默认实现。
+
+```rust
+trait PrintName {
+  fn PrintName(&self) -> String {
+    return "Unknow Name".to_string();
+  }
+}
+```
+
+倘若需要为类型 A 实现特征 B，那么两者必须有一个是在当前作用域中定义的。否则将无效。
+例如想为 `String` 实现 `Copy` 特征，但两者都定义在标准库中而不在当前作用域，因此无法实现。
+
+这个规则被称为孤儿规则，它确保了他人编写的代码不会破坏我们的代码，我们也不会莫名其妙破坏他人的代码。
+
+### 特征约束
+
+前面我们使用到了特征约束，即 `T: Into<String>`。它表示 `T` 必须实现 `Into<String>` 特征。
+
+特征约束不仅可以约束泛型，也可以约束特征自身。
+
+```rust
+trait PrintName: Display {
+  fn PrintName(&self) -> String;
+}
+```
+
+以上代码为 `PrintName` 特征的定义，它要求实现对象必须实现 `Display` 特征才能实现它。
+可以使用 `+` 号增加更多的约束。例如 `trait PrintName: Display + Clone` 表示 `PrintName` 必须实现 `Display` 和 `Clone` 特征才能实现它。
+
+### 参数约束
+
+特征也可以用来约束参数类型。
+
+```rust
+trait PrintName: Display {
+  fn PrintName(&self) -> String;
+}
+
+fn printName(item: &impl PrintName) {
+  println!("{}", item.PrintName());
+}
+
+// 以上等价于
+
+fn printName<T: PrintName>(item: &T) {
+  println!("{}", item.PrintName());
+}
+```
+
+## 为 TodoItem 实现特征
+
+在先前的开发中，我们为 `TodoItem` 实现了序列化和反序列化方法。这两种方法在开发过程中相当常见。
+我们如果要为每个方法都去实现一遍有点太繁琐了。
+
+因此，我们可以声明一个特征，从而将这些通用行为给抽离出来。
+
+首先定义 `Serializer` 特征表示序列化和反序列化方法集合。然后为 `TodoItem` 实现 `Serializer` 特征。
+
+```rust
+pub trait Serializer {
+    fn serialize(&self) -> String;
+    fn deserialize<S: Into<String>>(s: S) -> Self;
+}
+
+impl Serializer for TodoItem {
+    fn deserialize<S: Into<String>>(s: S) -> Self {
+        serde_json::from_str(&s.into()).unwrap()
+    }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+}
+```
+
+### 默认实现特征
+
+以上代码中，尽管我们已经将序列化和反序列化方法抽离。但仍然需要手动实现方法体。这依然较为繁琐。
+
+因此我们可以使用默认实现来取消手动实现方法体。
+
+```rust
+pub trait Serializer {
+    fn serialize(&self) -> String {
+      serde_json::to_string(self).unwrap()
+    }
+
+    fn deserialize<S: Into<String>>(s: S) -> Self {
+      serde_json::from_str(&s.into()).unwrap()
+    }
+}
+
+impl Serializer for TodoItem {}
+```
+
+将代码改成以上内容，然后运行。会发现有报错。我们先解决 `serialize` 方法的报错。
+
+```bash
+error[E0277]: the trait bound `Self: Serialize` is not satisfied
+    --> src\todo\core.rs:68:31
+     |
+68   |         serde_json::to_string(self).unwrap()
+     |         --------------------- ^^^^ the trait `Serialize` is not implemented for `Self`
+     |         |
+     |         required by a bound introduced by this call
+     |
+     = note: for local types consider adding `#[derive(serde::Serialize)]` to your `Self` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+note: required by a bound in `serde_json::to_string`
+    --> C:\Users\Administrator\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\serde_json-1.0.128\src\ser.rs:2209:17
+     |
+2207 | pub fn to_string<T>(value: &T) -> Result<String>
+     |        --------- required by a bound in this function
+2208 | where
+2209 |     T: ?Sized + Serialize,
+     |                 ^^^^^^^^^ required by this bound in `to_string`
+help: consider further restricting `Self`
+     |
+67   |     fn serialize(&self) -> String where Self: Serialize {
+     |                                   +++++++++++++++++++++
+```
+
+报错内容是 ```the trait bound `Self: Serialize` is not satisfied```。
+这是因为 `Self` 类型没有满足 `serde_json::to_string(self)` 要求的类型约束导致的。
+
+我们可以查看 `serde_json::to_string` 方法的定义。
+
+```rust
+serde_json::ser
+pub fn to_string<T>(value: &T) -> Result<String>
+where
+    T: ?Sized + Serialize,
+// ...
+```
+
+可以看见，它使用了 `where` 子句，要求 `T` 类型必须实现 `?Sized` 和 `Serialize` 特征。
+
+我们将类型约束补上。
+
+```rust
+pub trait Serializer
+where
+    Self: Sized + Serialize,
+{
+    fn serialize(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    fn deserialize<S: Into<String>>(s: S) -> Self {
+        serde_json::from_str(&s.into()).unwrap()
+    }
+}
+
+impl Serializer for TodoItem {}
+```
+
+再次运行，`serialize` 方法不再报错，现在只剩下 `deserialize` 方法的报错了。
+
+`deserialize` 方法的报错如下:
+
+```bash
+error[E0277]: the trait bound `Self: Deserialize<'_>` is not satisfied
+    --> src\todo\core.rs:75:9
+     |
+75   |         serde_json::from_str(&s.into()).unwrap()
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Deserialize<'_>` is not implemented for `Self`
+     |
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `Self` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+note: required by a bound in `serde_json::from_str`
+    --> C:\Users\Administrator\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\serde_json-1.0.128\src\de.rs:2680:8
+     |
+2678 | pub fn from_str<'a, T>(s: &'a str) -> Result<T>
+     |        -------- required by a bound in this function
+2679 | where
+2680 |     T: de::Deserialize<'a>,
+     |        ^^^^^^^^^^^^^^^^^^^ required by this bound in `from_str`
+help: consider further restricting `Self`
+     |
+74   |     fn deserialize<S: Into<String>>(s: S) -> Self where Self: Deserialize<'_> {
+     |                                                   +++++++++++++++++++++++++++
+```
+
+报错信息: ```the trait bound `Self: Deserialize<'_>` is not satisfied``` 可以看见，也是因为没有满足类型约束导致的。
+
+编译器也有提示我们增加约束。
+
+补上约束，代码如下:
+
+```rust
+pub trait Serializer
+where
+    Self: Sized + Serialize + Deserialize<'_>,
+{
+    fn serialize(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    fn deserialize<S: Into<String>>(s: S) -> Self {
+        serde_json::from_str(&s.into()).unwrap()
+    }
+}
+```
+
+重新运行，`deserialize` 的报错消失了。但出现了新的报错:
+
+```bash
+error[E0637]: `'_` cannot be used here
+  --> src\todo\core.rs:68:43
+   |
+68 |     Self: Sized + Serialize + Deserialize<'_>,
+   |                                           ^^ `'_` is a reserved lifetime name
+
+For more information about this error, try `rustc --explain E0637`.
+```
+
+报错信息: ``` `'_` cannot be used here```，表示这里不能使用 `'_`，
+``` `'_` is a reserved lifetime name``` 提示我们 `'_` 是保留的生命周期名称。
+
+### 生命周期
+
+生命周期，通常指某个事物从开始到结束的一个完整的过程。
+
+在 Rust 中，它是一个编译期概念，用于检查引用是否合法，避免悬垂指针等问题。
+通常情况下，我们不需要手动标注生命周期，编译器会自动推导。
+只有当编译器无法确定时，才需要手动标注。
+
+可以将 Rust 中的生命周期简单的认为就是引用的有效作用域。
+
+```rust
+{
+  let r;
+  {
+    let n = 0;
+    r = &n;
+  }
+  println!("r: {}", r);
+}
+```
+
+以上代码通过花括号被分为两层，在第一层，声明了变量 `r` 但未赋值。
+在第二层，声明了变量 `n`，并将 `n` 的地址赋值给 `r`。
+
+`n` 是一个局部变量，它的生命周期在第二层结束，即花括号结束。
+而 `r` 是一个引用，它指向 `n`，它的生命周期在 `r` 所在的作用域内，即第一层的花括号内。
+
+`n` 的生命周期比 `r` 的生命周期短，这没有问题。但是 `r` 被赋值为 `n` 的引用，就会导致出问题。
+因为 `n` 会在 `n` 的生命周期结束后被销毁，而 `r` 指向了一个已经被销毁的变量。
+
+回到新的 `deserialize` 方法报错。`'_` 是一个特殊的生命周期标记。它被用于生命周期省略或临时生命周期标注。
+它可以被编译器自动推导。但在类型约束这里并不被允许。
+
+Rust 要求在类型约束时，必须手动标注明确的生命周期名称。因为编译器无法在这里推断出具体的生命周期。
+
+我们将 `'_` 替换为 `'a`，再次运行。
+> 需要注意的是, Rust 的声明周期命名并没有什么特别要求，只是一般通常使用单个小写字母命名。
+
+原先的报错消失了，新的报错出现了。
+
+### 高阶生命周期绑定
+
+```bash
+error[E0261]: use of undeclared lifetime name `'a`
+  --> src\todo\core.rs:68:43
+   |
+68 |     Self: Sized + Serialize + Deserialize<'a>,
+   |                                           ^^ undeclared lifetime
+   |
+   = note: for more information on higher-ranked polymorphism, visit https://doc.rust-lang.org/nomicon/hrtb.html
+help: consider making the bound lifetime-generic with a new `'a` lifetime
+   |
+68 |     Self: Sized + Serialize + for<'a> Deserialize<'a>,
+   |                               +++++++
+help: consider making the bound lifetime-generic with a new `'a` lifetime
+   |
+68 |     for<'a> Self: Sized + Serialize + Deserialize<'a>,
+   |     +++++++
+help: consider introducing lifetime `'a` here
+   |
+66 | pub trait Serializer<'a>
+   |                     ++++
+```
+
+还是聚焦报错内容 ```use of undeclared lifetime name `'a` ```, 意思是我们使用了未声明的生命周期。编译器也给出多种解决方法。
+
+以下是几种解决方法的含义：
+
+- `Self: Sized + Serialize + for<'a> Deserialize<'a>`:
+  这是最常见通用的写法，使用了高阶生命周期约束，表示不论 `'a` 是什么生命周期，`Self` 都能实现特征 `Deserialize<'a>`。
+
+- `pub trait Serializer<'a>`:
+  这让特征本身携带生命周期参数，可以在该特征的所有方法中使用，但会导致使用特征时需要额外传递生命周期，侵入性较强。
+
+- `for<'a> Self: Sized + Serialize + Deserialize<'a>,`:
+  同样使用了高阶生命周期约束，但 `'a` 被作用于整个约束条件，表示不论 `'a` 是什么生命周期都能让类型约束成立。
+
+我们使用第一种即可。改造完毕后，再次运行，这次没有再报错了。
+
+## 参考内容
+
+- [Rust 官网](https://www.rust-lang.org/)
+- [Rust 语言圣经](https://course.rs/about-book.html)
+- [Rust 程序设计语言 中文版](https://rustwiki.org/zh-CN/book/title-page.html)
+- [锈书](https://rusty.course.rs/)
+- [通过例子学习 Rust](https://doc.rust-lang.org/rust-by-example/)
+- [100个练习题学习 Rust](https://colobu.com/rust100/)
+- [Rust 高级编程 2018 - 中文译本](https://learnku.com/docs/nomicon/2018)
