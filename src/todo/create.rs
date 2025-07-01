@@ -3,22 +3,16 @@ use crate::todo::core::TodoItem;
 pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
     let mut inputs: Vec<String> = Vec::new();
 
-    match title {
-        Some(title) => {
-            if !title.is_empty() {
-                inputs.push(title);
-            }
+    if let Some(arg_title) = title {
+        if !arg_title.is_empty() {
+            inputs.push(arg_title);
         }
-        _ => {}
     }
 
-    match content {
-        Some(content) => {
-            if !content.is_empty() {
-                inputs.push(content);
-            }
+    if let Some(arg_content) = content {
+        if !arg_content.is_empty() {
+            inputs.push(arg_content);
         }
-        _ => {}
     }
 
     let mut ok = inputs.len() == 0;

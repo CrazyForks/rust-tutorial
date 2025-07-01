@@ -1223,11 +1223,15 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
 }
 ```
 
+模式匹配是相当强大的，可以将枚举值的字段解构出,
 修改 `main.rs`：
 
 ```rust
 // ...
-  TodoCommand::Create { title, content } => todo::create::create_todo(&mut todos, title, content),
+  match args.command {
+    TodoCommand::Create { title, content } => todo::create::create_todo(&mut todos, title, content),
+    TodoCommand::List => todo::list::list_todo(&todos),
+  }
 // ...
 ```
 
@@ -1275,18 +1279,18 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
     let mut inputs: Vec<String> = Vec::new();
 
     match title {
-        Some(title) => {
-            if !title.is_empty() {
-                inputs.push(title);
+        Some(arg_title) => {
+            if !arg_title.is_empty() {
+                inputs.push(arg_title);
             }
         }
         _ => {}
     }
 
     match content {
-        Some(content) => {
-            if !content.is_empty() {
-                inputs.push(content);
+        Some(arg_content) => {
+            if !arg_content.is_empty() {
+                inputs.push(arg_content);
             }
         }
         _ => {}
@@ -1341,3 +1345,47 @@ fn reverse<T>(args: (T, T)) -> (T, T) {
 let a = reverse((1, 2));
 let b = reverse(("a", "b"));
 ```
+
+### if let
+
+在前面的代码中，我们对可选参数进行了模式匹配。
+
+```rust
+match title {
+    Some(arg_title) => {
+        if !arg_title.is_empty() {
+            inputs.push(arg_title);
+        }
+    }
+    _ => {}
+}
+```
+
+虽然功能正确，但代码稍显冗长，尤其当我们只关心某一个具体模式时。
+
+Rust 提供了一个 `if let` 语法糖，用来匹配并解构某个特定的枚举变体，而忽略其他所有可能的枚举值。
+
+于是我们可以将 `create_todo` 改为这样:
+
+```rust
+pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Option<String>) {
+    let mut inputs: Vec<String> = Vec::new();
+
+    if let Some(arg_title) = title {
+        if !arg_title.is_empty() {
+            inputs.push(arg_title);
+        }
+    }
+
+    if let Some(arg_content) = content {
+        if !arg_content.is_empty() {
+            inputs.push(arg_content);
+        }
+    }
+    // ...
+```
+
+这段代码的意思是如果 `title` 可以匹配出 `Some(arg_title)`，则将 `arg_title` 解构出并判断是否为空。
+而如果无法匹配，则什么都不做。
+
+可以看见，相较于之前，代码简化了不少。
