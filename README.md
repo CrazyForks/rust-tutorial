@@ -1403,3 +1403,181 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
 而如果无法匹配，则什么都不做。
 
 可以看见，相较于之前，代码简化了不少。
+
+## 查找 Todo
+
+我们将 `create` 命令功能基本完善了，它可以使用命令行参数和交互式界面两种方式来创建 Todo 项。
+
+但是我们的 `list` 命令还相对简陋，它只能列出所有的 Todo 项，而无法根据条件筛选 Todo 项。
+因此我们需要完善它。
+
+### 筛选 Todo
+
+我们将创建一个 `TodoItemFilter` 结构体。用来表示筛选配置。
+
+```rust
+pub struct TodoItemFilter {
+  pub title: Option<String>,
+  pub content: Option<String>,
+}
+```
+
+`TodoItemFilter` 将具有两个属性，分别代表需要筛选的 `title` 和 `content` 内容。
+因为可能只需要筛选其中一个，因此将两者均设为 `Option<String>` 属性表示可选的。
+
+接下来我们将为它实现一些方法。
+
+首先是实例化方法。
+
+```rust
+impl TodoItemFilter {
+  pub fn new() -> Self {
+    Self {
+      title: Option::None,
+      content: Option::None,
+    }
+  }
+}
+```
+
+在一开始，我们并没有办法知道需要筛选什么内容，因此将 `title` 和 `content` 均设为 `None`。
+
+### 泛型约束
+
+在之前代码中，我们了解到了用来占位表示任何类型的泛型。
+但仅仅只是一个 `T` 的范围就太大了。例如我们可能需要的参数是一个字符串，但却可以将数字，布尔传递进来。
+
+为解决这个问题，Rust 支持对泛型进行类型约束，使得泛型参数必须满足特定的条件。
+因此我们需要对泛型进行进一步的约束。
+
+例如，我们希望参数可以转换为字符串类型，那么可以使用 `Into<String>` 作为约束条件。
+`Into<String>` 表示“任何可以转换成 `String` 的类型”。
+
+```rust
+impl TodoItemFilter {
+  // ...
+  pub fn set_title<T: Into<String>>(&mut self, title: T) {
+    self.title = Some(title.into());
+  }
+
+  pub fn set_content<T: Into<String>>(&mut self, content: T) {
+    self.content = Some(content.into());
+  }
+}
+```
+
+上方代码分别为 `TodoItemFilter` 实现 `set_title` 和 `set_content` 方法。
+我们不关心参数 `T` 具体是什么类型，只要它满足约束条件 `Into<String>` 就行。
+无论 `T` 是 `String` 类型，还是 `&str` 类型，抑或是 `Vec<u8>` 类型，只要它可以被转换为 `String` 类型，都可以作为参数传入。
+
+类型约束有两种写法，上面的是第一种，直接将约束条件写在泛型参数位置，更加常用。
+第二种则是使用 `where` 子句单独列出，适用于复杂约束情况。
+
+```rust
+impl TodoItemFilter {
+  // ...
+  pub fn set_title<T>(&mut self, title: T) where T: Into<String> {
+    self.title = Some(title.into());
+  }
+
+  pub fn set_content<T>(&mut self, content: T) where T: Into<String> {
+    self.content = Some(content.into());
+  }
+}
+```
+
+### 筛选参数
+
+我们目前的 Todo 项具有两项属性，即 `title` 和 `content`。
+我们可以根据这两项属性中的任意一项或两项来筛选 Todo 项。
+
+我们为 `TodoItemFilter` 实现一个 `filter` 方法用于过滤 Todo 项。
+
+```rust
+pub fn filter(&self, list: &Vec<TodoItem>) {
+  let mut filtered_list = Vec::<&TodoItem>::new();
+
+  if self.title.is_none() && self.content.is_none() {
+    for item in list {
+      filtered_list.push(item);
+    }
+  } else {
+    for item in list {
+      let mut flag: (bool, bool) = (false, false);
+
+      flag.0 = match &self.title {
+        Some(title) => item.title.contains(title),
+        _ => true,
+      };
+
+      flag.1 = match &self.content {
+        Some(content) => item.content.contains(content),
+        _ => true,
+      };
+
+      if flag.0 && flag.1 {
+        filtered_list.push(item);
+      }
+    }
+  }
+
+  for item in filtered_list {
+    println!("todo title: {}, content: {}", item.title, item.content);
+  }
+}
+```
+
+以上代码为 `TodoItemFilter` 实现的 `filter` 方法。
+它首先创建一个空的 `filtered_list` 用于存储筛选后的 Todo 项。
+如果 `title` 和 `content` 均为空，则直接将所有 Todo 项放入 `filtered_list`。
+否则，遍历所有 Todo 项，根据 `title` 和 `content` 进行筛选。
+如果 Todo 项的 `title` 和 `content` 均包含筛选条件，则将其放入 `filtered_list`。
+
+最后，遍历 `filtered_list`，打印出筛选后的 Todo 项。
+
+然后我们改造 `TodoCommand` 枚举，为 `list` 命令增加两个参数。
+
+```rust
+// ...
+/// List all todo items
+List {
+  #[arg(short, long)]
+  title: Option<String>,
+  #[arg(short, long)]
+  content: Option<String>,
+}
+// ...
+```
+
+改造 `main` 函数，在 `list` 命令中添加筛选参数。
+
+```rust
+// ...
+  match args.command {
+    TodoCommand::Create { title, content } => {
+      todo::create::create_todo(&mut todos, title, content)
+    }
+    TodoCommand::List { title, content } => todo::list::list_todo(&todos, title, content),
+  }
+// ...
+```
+
+接着改造 `list_todo` 函数。
+
+```rust
+pub fn list_todo(todos: &Vec<TodoItem>, title: Option<String>, content: Option<String>) {
+  let mut filter = TodoItemFilter::new();
+
+  if let Some(title) = title {
+    filter.set_title(title);
+  }
+
+  if let Some(content) = content {
+    filter.set_content(content);
+  }
+
+  filter.filter(todos);
+}
+```
+
+现在，当我们执行 `cargo run -- list` 命令时，可以携带 `--title` 和 `--content` 参数进行筛选了。

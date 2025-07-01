@@ -20,7 +20,7 @@ fn main() {
         TodoCommand::Create { title, content } => {
             todo::create::create_todo(&mut todos, title, content)
         }
-        TodoCommand::List => todo::list::list_todo(&todos),
+        TodoCommand::List { title, content } => todo::list::list_todo(&todos, title, content),
     }
 
     save_todo_list(save_file, &todos);
