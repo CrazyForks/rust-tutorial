@@ -77,3 +77,25 @@ where
 }
 
 impl Serializer for TodoItem {}
+
+#[cfg(test)]
+mod tests {
+    use super::{Serializer, TodoItem};
+
+    #[test]
+    fn test_todo_item_creation() {
+        let item = TodoItem::new("test", "content");
+        assert_eq!(item.title, "test");
+        assert_eq!(item.content, "content");
+    }
+
+    #[test]
+    fn test_serialization_roundtrip() {
+        let original = TodoItem::new("test", "content");
+        let serialized = original.serialize();
+        let deserialized = TodoItem::deserialize(serialized);
+
+        assert_eq!(original.title, deserialized.title);
+        assert_eq!(original.content, deserialized.content);
+    }
+}

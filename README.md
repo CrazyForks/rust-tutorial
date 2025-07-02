@@ -361,6 +361,8 @@ Rust 支持常见的基本类型:
 以上代码意思是, 如果 `len > 2` 条件成立, 就使用 `args[2].clone()` 作为 `content` 的值。
 否则, 就使用 `String::from("default content")` 作为 `content` 的值。
 
+> Rust 是一种表达式导向的语言，实际上大部分的结构都可以返回值。
+
 ### 循环
 
 Rust 中, 循环方式如下：
@@ -877,6 +879,20 @@ pub mod list;
 但如果实在 1.30 以后, 那么可以在模块同级位置创建一个同名的 `.rs` 文件来作为模块入口声明。
 
 这里使用的就是使用与模块同名的 `.rs` 文件作为模块入口声明。
+
+需要注意的是，模块是可以直接声明的，而无需单独文件。
+
+```rust
+pub mod list {
+  use super::core::TodoItem;
+
+  pub fn list_todo(todos: &Vec<TodoItem>) {
+    for todo in todos {
+      println!("todo title: {}, content: {}", todo.title, todo.content);
+    }
+  }
+}
+```
 
 ```rust
 // src/main.rs
@@ -1964,9 +1980,130 @@ help: consider introducing lifetime `'a` here
 
 我们使用第一种即可。改造完毕后, 再次运行, 这次没有再报错了。
 
-## 参考内容
+## 验证功能
+
+到达这一步，我们已经完成了 Todo CLI 的创建、查看、筛选和持久化功能。
+尽管我们可以手动运行命令行进行验证，但随着功能越来越多、逻辑越来越复杂，仅靠人手操作显得既繁琐又容易遗漏。
+
+Rust 提供了强大的内建测试模块，允许我们通过自动化方式验证功能是否正确，避免反复手动测试。
+
+### 单元测试
+
+单元测试目标是测试某一个代码单元(一般都是函数)，验证该单元是否能按照预期进行工作，
+例如测试一个 `add` 函数，验证当给予两个输入时，最终返回的和是否符合预期。
+
+我们可以在每个模块中写自己的测试逻辑，并通过 cargo test 命令批量执行它们。
+
+Rust 中通常将单元测试代码和被测试代码放在一个文件中。
+
+```rust
+// src/todo/core.rs
+
+// ...
+#[cfg(test)]
+mod tests {
+    // 因为是子模块，因此需要使用 super 关键字来引用父模块
+    use super::{Serializer, TodoItem};
+
+    #[test]
+    fn test_todo_item_creation() {
+        let item = TodoItem::new("test1", "content");
+        assert_eq!(item.title, "test");
+        assert_eq!(item.content, "content");
+    }
+
+    #[test]
+    fn test_serialization_roundtrip() {
+        let original = TodoItem::new("test", "content");
+        let serialized = original.serialize();
+        let deserialized = TodoItem::deserialize(serialized);
+
+        assert_eq!(original.title, deserialized.title);
+        assert_eq!(original.content, deserialized.content);
+    }
+}
+```
+
+以上代码中，我们添加了两个测试函数：
+
+- `test_todo_item_creation`: 验证 `TodoItem::new`方法能否正确赋值。
+- `test_serialization_roundtrip`: 验证结构体能否被序列化后再还原回来。
+
+在 `src/todo/core.rs` 文件中增加以上内容后，运行 `cargo test` 命令，Rust 就会进行测试了。
+
+```bash
+test todo::core::tests::test_serialization_roundtrip ... ok
+test todo::core::tests::test_todo_item_creation ... FAILED
+
+failures:
+
+---- todo::core::tests::test_todo_item_creation stdout ----
+
+thread 'todo::core::tests::test_todo_item_creation' panicked at src\todo\core.rs:88:9:
+assertion `left == right` failed
+  left: "test1"
+ right: "test"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    todo::core::tests::test_todo_item_creation
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+可以看见 `todo::core::tests::test_todo_item_creation` 方法报错了，说明内容:
+
+```bash
+assertion `left == right` failed
+  left: "test1"
+ right: "test"
+```
+
+意思是断言失败了，因为两个值不匹配。
+回到测试代码，把 `let item = TodoItem::new("test1", "content");` 中写错的 `test1` 改为 `test`。
+重新运行 `cargo test` 命令，结果如下:
+
+```bash
+running 2 tests
+test todo::core::tests::test_todo_item_creation ... ok
+test todo::core::tests::test_serialization_roundtrip ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+说明我们的测试全部通过，功能符合预期。
+
+### 断言
+
+断言是指在程序中设置检查点，当程序执行到这些检查点时，会对程序的状态进行检查。
+如果检查结果为真，程序继续执行；如果检查结果为假，程序会抛出异常，终止执行。
+
+Rust 中常用的断言有以下几种：
+
+- `assert!(expr)`: 如果 `expr` 为假，抛出异常。
+- `assert_eq!(left, right)`: 如果 `left` 不等于 `right`，抛出异常。
+- `assert_ne!(left, right)`: 如果 `left` 等于 `right`，抛出异常。
+
+如果加上 `debug_` 前缀，则只在 `Debug` 模式运行，如 `debug_assert!(expr)`。
+
+### 条件编译
+
+在测试部分的代码中，我们可以看见在模块 `tests` 上的 `#[cfg(test)]`。
+
+它用于进行条件编译。表示 `tests` 的代码仅在满足 `test` 条件时进行编译。
+即只在 `cargo test` 命令执行时才会编译。
+
+除了 `test` 条件外，我们还可以增加更多的条件，例如:
+
+- `#[cfg(all(target_os="windows", test))]` 表示仅在编译对象为 `windows` 平台时运行 `cargo test` 编译。
+- `#[cfg(all(any(target_os = "ios", target_os = "android"), test))]` 表示仅在编译对象为移动端时运行 `cargo test` 编译。
+- `#[cfg(all(not(any(target_os = "ios", target_os = "android")), test))]` 表示仅在编译对象非移动端时运行 `cargo test` 编译。
+
+条件编译可以用在许多地方，小到一个变量，大到一个模块都可以使用条件编译。
 
 - [Rust 官网](https://www.rust-lang.org/)
+- [Rust 参考手册](https://doc.rust-lang.org/stable/reference/introduction.html)
 - [Rust 语言圣经](https://course.rs/about-book.html)
 - [Rust 程序设计语言 中文版](https://rustwiki.org/zh-CN/book/title-page.html)
 - [锈书](https://rusty.course.rs/)
