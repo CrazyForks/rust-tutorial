@@ -2250,11 +2250,41 @@ Rust 中常用的断言有以下几种：
 
 条件编译可以用在许多地方，小到一个变量，大到一个模块都可以使用条件编译。
 
+## 总结
+
+通过本文的学习，我们不仅迈出了 Rust 编程的第一步，更通过亲手实现一个 Todo CLI，将理论知识转化为实际应用能力。
+从最初的 “Hello, world!” 输出，到最终能通过命令行创建、列出 Todo 项并实现数据持久化，我们逐步掌握了 Rust 从基础语法到核心特性的关键知识点。
+
+在这个过程中，我们深入理解了 Rust 区别于其他语言的核心设计：
+
+- 所有权系统通过严格的内存管理规则避免悬垂指针和重复释放问题。
+- 借用与生命周期机制确保引用的有效性。
+- 特征与泛型则实现了灵活的代码抽象与复用。
+
+同时，我们也实践了 Rust 工程化开发的关键环节，
+使用 cargo 管理项目与依赖、通过模块化拆分代码结构。
+借助 `serde` 和 `clap` 等第三方库提升开发效率，以及通过单元测试保障代码质量。
+
+然而，当前的 Todo CLI 仍有较大优化空间：
+
+目前的功能仅支持 create（创建）和 list（列表）两个命令，缺乏对 Todo 项的删除和修改功能，无法应对日常使用中 “任务变更” 的场景。
+
+Todo 项数据仅包含标题和内容，缺少状态标记（如 “已完成”“未完成”），难以跟踪任务进度。
+
+此外，命令行交互的容错性、筛选功能的精细化（如按状态筛选）等细节也有待完善。
+
+但这些不足恰恰是深入学习的契机。
+
+我们可以尝试通过扩展功能、优化实现，我们可以进一步巩固 Rust 的模式匹配、错误处理、枚举设计等知识点。
+真正将 “内存安全”“高性能” 的特性融入实际开发中，让这个简单的工具逐渐成长为一个实用、健壮的生产力工具。
+
+## 参考内容
+
+- [锈书](https://rusty.course.rs/)
 - [Rust 官网](https://www.rust-lang.org/)
 - [Rust 参考手册](https://doc.rust-lang.org/stable/reference/introduction.html)
 - [Rust 语言圣经](https://course.rs/about-book.html)
-- [Rust 程序设计语言 中文版](https://rustwiki.org/zh-CN/book/title-page.html)
-- [锈书](https://rusty.course.rs/)
 - [通过例子学习 Rust](https://doc.rust-lang.org/rust-by-example/)
 - [100个练习题学习 Rust](https://colobu.com/rust100/)
+- [Rust 程序设计语言 中文版](https://rustwiki.org/zh-CN/book/title-page.html)
 - [Rust 高级编程 2018 - 中文译本](https://learnku.com/docs/nomicon/2018)
