@@ -30,7 +30,7 @@ cargo init Project # 当前目录下新建一个 Project 目录
 
 使用 `cargo init cli` 初始化一个名为 cli 的项目。
 
-目录结构如下：
+目录结构如下:
 
 ```sh
 # cli 目录结构
@@ -80,21 +80,21 @@ fn main() {
 
 我们的 CLI 用于记录 Todo 事项, 因此我们需要可以输入内容。
 
-Rust 官方提供了标准库 `std::env` 用来获取环境信息。它提供了一个 `args` 函数，允许获取命令行参数。
+Rust 官方提供了标准库 `std::env` 用来获取环境信息。它提供了一个 `args` 函数, 允许获取命令行参数。
 
-更改 `main.rs` 为如下内容：
+更改 `main.rs` 为如下内容:
 
 ```rust
 fn main() {
   // 因为 args 函数返回的是一个迭代器, 我们需要将其收集为一个数据集合
-  // 用户输入是未知的，因此我们需要指定收集的输入类型，即 String
+  // 用户输入是未知的, 因此我们需要指定收集的输入类型, 即 String
   let args: Vec<String> = std::env::args().collect();
 
   println!("{:#?}", args);
 }
 ```
 
-命令行运行 `cargo run -- a b`, 结果如下：
+命令行运行 `cargo run -- a b`, 结果如下:
 
 ```bash
 [
@@ -108,7 +108,7 @@ fn main() {
 
 我们需要的是输入的内容, 即 `a,b`。
 
-调整代码：
+调整代码:
 
 ```rust
 fn main() {
@@ -121,7 +121,7 @@ fn main() {
 }
 ```
 
-运行 `cargo run -- a b`。会发现有报错：
+运行 `cargo run -- a b`。会发现有报错:
 
 ```bash
 error[E0507]: cannot move out of index of `Vec<String>`
@@ -157,7 +157,7 @@ help: consider cloning the value if the performance cost is acceptable
 
 ### 所有权
 
-以上报错的关键如下：
+以上报错的关键如下:
 
 ```bash
 cannot move out of index of `Vec<String>`
@@ -167,7 +167,7 @@ move occurs because value has type `String`, which does not implement the `Copy`
 
 它的意思是: 无法从 `Vec<String>` 中取出值, 因为 `String` 类型没有实现 `Copy` 特征, 无法被隐式复制。
 
-在前面有提及到：
+在前面有提及到:
 
 > Rust 它从语言设计层面 “不信任开发者”, 认为 “你总有一天会犯错”。
 >
@@ -175,7 +175,7 @@ move occurs because value has type `String`, which does not implement the `Copy`
 
 这里就是因为 Rust 引入的所有权系统导致的问题。
 
-根据 Rust 所有权规则：
+根据 Rust 所有权规则:
 
 - 每个值都有一个所有者。
 - 每个值同时只能有一个所有者。
@@ -194,7 +194,7 @@ move occurs because value has type `String`, which does not implement the `Copy`
 Rust 在其语言设计层面上“不信任开发者”, 因此它采用了所有权系统来强制保障内存安全。
 编译器非常“智能”, 它不仅会告诉你哪里出错了, 还会提供修复建议。
 
-比如, 下面的编译错误信息中就给出了两种可能的解决方式：
+比如, 下面的编译错误信息中就给出了两种可能的解决方式:
 
 ```bash
 help: consider borrowing here
@@ -263,7 +263,7 @@ help: consider making this binding mutable
 ```
 
 这是因为 Rust 出于安全性和可读性考虑, 默认所有变量都是不可变的。
-这段报错的意思是：不能对不可变变量 `content` 进行二次赋值, 除非将它声明为可变的。
+这段报错的意思是: 不能对不可变变量 `content` 进行二次赋值, 除非将它声明为可变的。
 
 编译器已经为我们提示了。在 `let` 后面增加 `mut` 关键字即可。
 
@@ -291,13 +291,13 @@ Rust 是一门强类型的语言, 这意味着变量在编译时必须要有明�
 类型确定方式有两种, 分别是显式声明和隐式推断。
 
 显式声明, 在变量名称后面使用 `:` 指定类型。
-例如：`let args: Vec<String> = std::env::args().collect();`。将变量 `args` 的类型指定为 `Vec<String>`。
+例如: `let args: Vec<String> = std::env::args().collect();`。将变量 `args` 的类型指定为 `Vec<String>`。
 
 隐式推断, 编译器根据变量的值和上下文推断变量的类型。
 而 Rust 有着强大的类型推断机制, 使得我们在大多数情况下, 不需要手动标注类型。
 编译器会自动推断类型, 只有当编译器无法推断类型时才需要手动标注。
 
-例如以下代码中, 我们并未显式声明 `len`, `title` 或 `content` 的类型, 但它们的类型仍然是确定的：
+例如以下代码中, 我们并未显式声明 `len`, `title` 或 `content` 的类型, 但它们的类型仍然是确定的:
 
 ```rust
   let args: Vec<String> = std::env::args().collect();
@@ -361,11 +361,11 @@ Rust 支持常见的基本类型:
 以上代码意思是, 如果 `len > 2` 条件成立, 就使用 `args[2].clone()` 作为 `content` 的值。
 否则, 就使用 `String::from("default content")` 作为 `content` 的值。
 
-> Rust 是一种表达式导向的语言，实际上大部分的结构都可以返回值。
+> Rust 是一种表达式导向的语言, 实际上大部分的结构都可以返回值。
 
 ### 循环
 
-Rust 中, 循环方式如下：
+Rust 中, 循环方式如下:
 
 - `loop` 循环会一直执行, 直到遇到 `break` 语句。
 - `while` 循环会在条件成立的情况下执行。
@@ -478,7 +478,7 @@ loop {
 
 我们将为 CLI 程序增加一个 `list` 命令, 用于列出所有的 Todo 项。
 
-修改 `main.rs` 如下：
+修改 `main.rs` 如下:
 
 ```rust
 fn main() {
@@ -508,44 +508,44 @@ fn main() {
 
 ## 切片和数组
 
-在前面的代码中，我们使用到了 `String` 类型和 `&str` 类型。
+在前面的代码中, 我们使用到了 `String` 类型和 `&str` 类型。
 可既然有 `&str` 那为什么要使用 `String` 呢?
 
 这是因为在 Rust 中, `String` 类型的字符串, 是一个动态长度的字符串, 可以在任意位置增加或减少字符。
 而 `&str` 类型的字符串, 是一个静态长度的字符串, 它的长度在编译时就确定了, 不能改变。
 
-`&str` 适用于只读借用，而 `String` 适用于修改操作。
+`&str` 适用于只读借用, 而 `String` 适用于修改操作。
 
 ### 切片
 
-切片允许引用集合中的部分连续元素，而不是整个集合。`&str` 类型就是一个字符串切片。
+切片允许引用集合中的部分连续元素, 而不是整个集合。`&str` 类型就是一个字符串切片。
 
 切片的语法是 `&[start..end]`。其中 `start` 是切片的起始位置, `end` 是切片的结束位置。
 需要注意的是, 切片的范围是左闭右开区间, 即包含 `start` 位置, 不包含 `end` 位置。
 
-例如：`let s = "hello world";`，`s` 就是一个字符串切片, 它的类型是 `&str`。
+例如: `let s = "hello world";`, `s` 就是一个字符串切片, 它的类型是 `&str`。
 `&s[0..5]` 表示获取字符串 `s` 的前 5 个字符, 即 `"hello"`。
 
-边界是可以省略的，从零开始可以写为：`&s[..5]`，到结尾可以写为: `&s[6..]`。
+边界是可以省略的, 从零开始可以写为: `&s[..5]`, 到结尾可以写为: `&s[6..]`。
 
-> Rust 字符串是 UTF-8 编码，切片时需要保证切在合法字符边界，否则会导致程序崩溃。
+> Rust 字符串是 UTF-8 编码, 切片时需要保证切在合法字符边界, 否则会导致程序崩溃。
 
-切片是相当常用的功能，避免了复制从而提供效率，也可以提供灵活视图操作。
+切片是相当常用的功能, 避免了复制从而提供效率, 也可以提供灵活视图操作。
 
 ### 数组
 
-Rust 中的数组也是编译时固定长度，要求所有元素类型相同，性能较高，使用 `let var: [type; length] = [];` 定义。
-例如：`let arr: [i32; 5] = [1, 2, 3, 4, 5];`，声明了一个长度 5 的 `i32` 类型数组。
+Rust 中的数组也是编译时固定长度, 要求所有元素类型相同, 性能较高, 使用 `let var: [type; length] = [];` 定义。
+例如: `let arr: [i32; 5] = [1, 2, 3, 4, 5];`, 声明了一个长度 5 的 `i32` 类型数组。
 
-如果需要使用动态的数组，Rust 提供了 `Vec<T>` 动态数组，它的长度可以在运行时改变。常用于不定量数据，例如用户输入，命令行参数等。
+如果需要使用动态的数组, Rust 提供了 `Vec<T>` 动态数组, 它的长度可以在运行时改变。常用于不定量数据, 例如用户输入, 命令行参数等。
 前面我们使用的 `Vec<String>` 就是这样的元素类型为 `String` 的动态数组。
 
 ## 模式匹配
 
-目前, 我们的 CLI 程序包含两个命令：
+目前, 我们的 CLI 程序包含两个命令:
 
-- `create`：创建 Todo 项。
-- `list`：查看 Todo 列表。
+- `create`: 创建 Todo 项。
+- `list`: 查看 Todo 列表。
 
 但随着功能逐渐扩展, 代码也逐渐变得臃肿、不易维护。
 
@@ -656,7 +656,7 @@ fn main() {
 
 在先前的代码中, 我们定义了 `todos` 变量来存储 Todo 项, 并逐个实例化 Todo 项然后添加到 `todos` 中。
 
-我们实例化 Todo 项的代码如下, 可以看到, 有些繁琐：
+我们实例化 Todo 项的代码如下, 可以看到, 有些繁琐:
 
 ```rust
 TodoItem {
@@ -667,7 +667,7 @@ TodoItem {
 
 为了避免每次都写重复的转换和构造过程, 我们可以使用 Rust 的函数。
 
-函数是一段可以被重复调用的代码块。用于完成特定的任务。可以：
+函数是一段可以被重复调用的代码块。用于完成特定的任务。可以:
 
 - 将某段功能独立出, 从而进行复用, 避免代码重复。
 - 通过函数名描述功能, 让代码结构清晰, 提升可读性。
@@ -702,7 +702,7 @@ fn main() {
 
 通过封装 `create_todo_item` 函数, 我们只需要传入标题和内容两个参数, 就能快速创建一个 `TodoItem` 实例, 既简洁, 又易于阅读和维护。
 
-这样的封装方式在实际开发中非常常见, 也体现了函数抽象的核心思想：隐藏实现细节, 对外暴露清晰的接口。
+这样的封装方式在实际开发中非常常见, 也体现了函数抽象的核心思想: 隐藏实现细节, 对外暴露清晰的接口。
 
 ## 模块化
 
@@ -718,7 +718,7 @@ fn main() {
   |- main.rs
 ```
 
-新建一些文件, 项目结构如下：
+新建一些文件, 项目结构如下:
 
 ```bash
 |- src/
@@ -849,7 +849,7 @@ pub fn list_todo(todos: &Vec<TodoItem>) {
 在以上代码中, 可以看见 `use super::core::TodoItem;` 这行语句。
 这是在引用其他模块的内容。
 
-Rust 使用类型文件夹路径的方式来引用不同的模块内容, 并提供了三种路径前缀：
+Rust 使用类型文件夹路径的方式来引用不同的模块内容, 并提供了三种路径前缀:
 
 - `super`, 表示当前模块的父模块。
 - `self`, 表示当前模块自身。
@@ -880,7 +880,7 @@ pub mod list;
 
 这里使用的就是使用与模块同名的 `.rs` 文件作为模块入口声明。
 
-需要注意的是，模块是可以直接声明的，而无需单独文件。
+需要注意的是, 模块是可以直接声明的, 而无需单独文件。
 
 ```rust
 pub mod list {
@@ -918,7 +918,7 @@ fn main() {
 
 为了让用户的数据在下次启动程序时依然可用, 我们需要将数据持久化, 也就是保存到磁盘上。
 
-一个简单且常见的做法是：将数据保存到一个文件中。程序启动时从文件中读取任务列表, 退出或修改数据时再将更新后的任务保存回文件。
+一个简单且常见的做法是: 将数据保存到一个文件中。程序启动时从文件中读取任务列表, 退出或修改数据时再将更新后的任务保存回文件。
 
 要实现这一功能, 我们需要先让数据支持序列化与反序列化。
 
@@ -951,7 +951,7 @@ cargo add serde_json                  # 增加 serde_json 依赖
 
 在 Rust 中, 我们可以使用 `impl` 关键字为结构体定义方法, 将结构体和它的行为组织在一起。
 
-我们来为 `TodoItem` 添加创建、序列化和反序列化的方法：
+我们来为 `TodoItem` 添加创建、序列化和反序列化的方法:
 
 ```rust
 // src/todo/core.rs
@@ -982,11 +982,11 @@ impl TodoItem {
 我们在结构体上添加了 `#[derive(Serialize, Deserialize)]` 派生宏,
 这会自动为 `TodoItem` 实现 `Serde` 所需的转换逻辑。避免了手动实现的复杂性。
 
-此外, 我们还添加了：
+此外, 我们还添加了:
 
-- `new` 方法：用于创建一个新的 `TodoItem`, 现在可以直接用 `TodoItem::new(...)` 替代之前的 `create_todo_item(...)`。
-- `serializer` 方法：将当前实例转换为 JSON 字符串。
-- `deserializer` 方法：从 JSON 字符串还原为 `TodoItem` 实例。
+- `new` 方法: 用于创建一个新的 `TodoItem`, 现在可以直接用 `TodoItem::new(...)` 替代之前的 `create_todo_item(...)`。
+- `serializer` 方法: 将当前实例转换为 JSON 字符串。
+- `deserializer` 方法: 从 JSON 字符串还原为 `TodoItem` 实例。
 
 通过这种方式, 我们就为 `TodoItem` 实现了基本的序列化与反序列化功能。接下来, 我们就可以在程序中使用文件来保存和读取任务数据了。
 
@@ -1006,7 +1006,7 @@ impl TodoItem {
 
 现在, 我们已经实现了 `TodoItem` 的序列化和反序列化。接下来, 我们需要将数据存储到文件中, 实现持久化。
 
-Rust 提供了标准库 `std::fs` 用于文件读写。我们将使用它实现以下两个功能：
+Rust 提供了标准库 `std::fs` 用于文件读写。我们将使用它实现以下两个功能:
 
 - 保存 Todo 列表到文件。
 - 读取 Todo 列表到程序。
@@ -1072,7 +1072,7 @@ fn main() {
 }
 ```
 
-这样, 当我们执行以下命令时：
+这样, 当我们执行以下命令时:
 
 ```bash
 cargo run -- list    # 显示 Todo 列表（包括初始默认内容）
@@ -1083,7 +1083,7 @@ cargo run -- create  # 添加 Todo 项（修改会被保存）
 
 ## 枚举
 
-目前, 我们的程序通过匹配 `args[1]` 实现 `create` 与 `list` 两个命令：
+目前, 我们的程序通过匹配 `args[1]` 实现 `create` 与 `list` 两个命令:
 
 ```rust
 match args[1].as_str() {
@@ -1093,7 +1093,7 @@ match args[1].as_str() {
 }
 ```
 
-虽然简单直观, 但这种基于字符串的匹配存在如下问题：
+虽然简单直观, 但这种基于字符串的匹配存在如下问题:
 
 - 命令数量增加后, `match` 分支会变得冗长。
 - 容易因拼写错误而出错, 缺乏类型保障。
@@ -1116,13 +1116,13 @@ cargo add clap --features derive # 增加依赖并启用 derive 功能
 
 它的作用是用于表示一组有限的、互斥的可能取值, 例如周一到周日, 性别等。
 
-与其他语言的枚举相比, Rust 的枚举更加灵活和强大：
+与其他语言的枚举相比, Rust 的枚举更加灵活和强大:
 
 - 支持每个变体携带不同的数据。
 - 可与模式匹配强结合, 做复杂的控制流。
 - 可以和 `trait`、方法一起使用, 实现丰富的抽象设计。
 
-这使得枚举天然适合表示 CLI 的命令结构：每个命令对应一个枚举变体, 每个变体携带所需参数。
+这使得枚举天然适合表示 CLI 的命令结构: 每个命令对应一个枚举变体, 每个变体携带所需参数。
 
 ### 声明枚举
 
@@ -1208,7 +1208,7 @@ Options:
 在上面的例子中, 我们给 TodoCommand 的每个枚举项添加了文档注释。
 但是当我们运行 `--help` 时, 注释内容却自动出现在帮助信息中。
 
-这可能让人疑惑：我们只是加了一些注释, 为什么这些注释会出现在运行时输出的帮助信息里？
+这可能让人疑惑: 我们只是加了一些注释, 为什么这些注释会出现在运行时输出的帮助信息里？
 
 这是因为在 Rust 中的注释有三种方式。
 
@@ -1288,7 +1288,7 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
 ```
 
 模式匹配是相当强大的, 可以将枚举值的字段解构出,
-修改 `main.rs`：
+修改 `main.rs`:
 
 ```rust
 // ...
@@ -1373,7 +1373,7 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
 
 Rust 是一门静态类型语言, 拥有强大而灵活的类型系统。
 为了保证类型安全, Rust 要求在编译期间就确定所有变量和参数的类型。
-这虽然增强了代码的可靠性, 但也带来了一个问题：我们往往需要为不同的类型编写大量结构相似但类型不同的代码。
+这虽然增强了代码的可靠性, 但也带来了一个问题: 我们往往需要为不同的类型编写大量结构相似但类型不同的代码。
 
 例如翻转一个元组, 如果不使用泛型, 将是这样的。
 
@@ -1415,7 +1415,7 @@ let b = reverse(("a", "b"));
 需要注意的是, `T` 并不是固定的名称, 只是约定成俗将泛型参数命名为 `T`。
 只要开发者愿意, 那么将泛型可以是任何符合变量命名规则的名称。
 
-下面的示例展示了如何使用多个自定义命名的泛型参数：
+下面的示例展示了如何使用多个自定义命名的泛型参数:
 
 ```rust
 fn reverse<Rust_1, Rust_2>(args: (Rust_1, Rust_2)) -> (Rust_2, Rust_1) {
@@ -1470,7 +1470,7 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
 
 ## 错误处理
 
-在进行数据持久化时，我们编写了 `save_todo_list` 方法。
+在进行数据持久化时, 我们编写了 `save_todo_list` 方法。
 
 ```rust
 pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
@@ -1479,10 +1479,10 @@ pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
 }
 ```
 
-虽然这样写能让程序正常运行，但也埋下了隐患。
-即，一旦序列化失败或文件写入失败，就会导致程序崩溃。
+虽然这样写能让程序正常运行, 但也埋下了隐患。
+即, 一旦序列化失败或文件写入失败, 就会导致程序崩溃。
 
-我们希望即使程序运行出错也可以正常处理，而不是崩溃。
+我们希望即使程序运行出错也可以正常处理, 而不是崩溃。
 因此我们需要引入 Rust 的错误处理机制。
 
 Rust 并没有 `try-catch` 机制。
@@ -1491,8 +1491,8 @@ Rust 并没有 `try-catch` 机制。
 
 ```rust
 enum Result<T, E> {
-    Ok(T),      // 操作成功时，返回结果 T
-    Err(E),     // 操作失败时，返回错误类型 E
+    Ok(T),      // 操作成功时, 返回结果 T
+    Err(E),     // 操作失败时, 返回错误类型 E
 }
 ```
 
@@ -1531,7 +1531,7 @@ pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
 }
 ```
 
-这样，即使出错了，程序也能继续运行，并向用户提示错误原因。
+这样, 即使出错了, 程序也能继续运行, 并向用户提示错误原因。
 
 ### try 运算符
 
@@ -1545,7 +1545,7 @@ pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), Stri
 }
 ```
 
-可当我们直接运行以上代码时，编译器会报错。
+可当我们直接运行以上代码时, 编译器会报错。
 
 ```bash
 error[E0277]: `?` couldn't convert the error to `std::string::String`
@@ -1571,12 +1571,12 @@ error[E0277]: `?` couldn't convert the error to `std::string::String`
    = note: required for `Result<(), std::string::String>` to implement `FromResidual<Result<Infallible, serde_json::Error>>`
 ```
 
-这是因为只有当返回类型是 `Result` 且错误一致时，才能够使用 `?`。
+这是因为只有当返回类型是 `Result` 且错误一致时, 才能够使用 `?`。
 
-我们可以看到报错信息：``` `?` couldn't convert the error to `std::string::String` ``` ,
+我们可以看到报错信息: ``` `?` couldn't convert the error to `std::string::String` ``` ,
 
-错误原因是 `save_todo_list` 返回 `Result<(), String>`，但 `serde_json::to_string(...)` 的错误类型是 `serde_json::Error`，
-? 运算符尝试将 `serde_json::Error` 转换为 `String`，但 `From<serde_json::Error> for String` 并未实现。
+错误原因是 `save_todo_list` 返回 `Result<(), String>`, 但 `serde_json::to_string(...)` 的错误类型是 `serde_json::Error`,
+? 运算符尝试将 `serde_json::Error` 转换为 `String`, 但 `From<serde_json::Error> for String` 并未实现。
 
 于是我们需要对错误进行转换, 使得返回的类型与 `save_todo_list` 函数一致。
 
@@ -1584,8 +1584,8 @@ error[E0277]: `?` couldn't convert the error to `std::string::String`
 
 我们可以使用闭包来解决这个问题。
 
-闭包是一种匿名函数, 除了可以接受参数外，还可以捕获其环境中的变量。
-除此之外，闭包还可以作为参数传递给函数。
+闭包是一种匿名函数, 除了可以接受参数外, 还可以捕获其环境中的变量。
+除此之外, 闭包还可以作为参数传递给函数。
 
 语法如下:
 
@@ -1600,10 +1600,10 @@ error[E0277]: `?` couldn't convert the error to `std::string::String`
 }
 ```
 
-如果只有一个返回表达式，可以简化为 `let add_x = |y| x + y;`。
+如果只有一个返回表达式, 可以简化为 `let add_x = |y| x + y;`。
 
-认识了闭包之后，我们就可以改造 `save_todo_list` 了。
-使用 `map_err` 函数，传递一个闭包，将可能发生的错误统一转换为 `String` 类型。
+认识了闭包之后, 我们就可以改造 `save_todo_list` 了。
+使用 `map_err` 函数, 传递一个闭包, 将可能发生的错误统一转换为 `String` 类型。
 
 ```rust
 pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), String> {
@@ -1613,7 +1613,7 @@ pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), Stri
 }
 ```
 
-重新运行，这下就可以正常工作了。
+重新运行, 这下就可以正常工作了。
 
 ## 查找 Todo
 
@@ -2115,7 +2115,7 @@ help: consider introducing lifetime `'a` here
 
 还是聚焦报错内容 ```use of undeclared lifetime name `'a` ```, 意思是我们使用了未声明的生命周期。编译器也给出多种解决方法。
 
-以下是几种解决方法的含义：
+以下是几种解决方法的含义:
 
 - `Self: Sized + Serialize + for<'a> Deserialize<'a>`:
   这是最常见通用的写法, 使用了高阶生命周期约束, 表示不论 `'a` 是什么生命周期, `Self` 都能实现特征 `Deserialize<'a>`。
@@ -2130,17 +2130,17 @@ help: consider introducing lifetime `'a` here
 
 ## 验证功能
 
-到达这一步，我们已经完成了 Todo CLI 的创建、查看、筛选和持久化功能。
-尽管我们可以手动运行命令行进行验证，但随着功能越来越多、逻辑越来越复杂，仅靠人手操作显得既繁琐又容易遗漏。
+到达这一步, 我们已经完成了 Todo CLI 的创建、查看、筛选和持久化功能。
+尽管我们可以手动运行命令行进行验证, 但随着功能越来越多、逻辑越来越复杂, 仅靠人手操作显得既繁琐又容易遗漏。
 
-Rust 提供了强大的内建测试模块，允许我们通过自动化方式验证功能是否正确，避免反复手动测试。
+Rust 提供了强大的内建测试模块, 允许我们通过自动化方式验证功能是否正确, 避免反复手动测试。
 
 ### 单元测试
 
-单元测试目标是测试某一个代码单元(一般都是函数)，验证该单元是否能按照预期进行工作，
-例如测试一个 `add` 函数，验证当给予两个输入时，最终返回的和是否符合预期。
+单元测试目标是测试某一个代码单元(一般都是函数), 验证该单元是否能按照预期进行工作,
+例如测试一个 `add` 函数, 验证当给予两个输入时, 最终返回的和是否符合预期。
 
-我们可以在每个模块中写自己的测试逻辑，并通过 cargo test 命令批量执行它们。
+我们可以在每个模块中写自己的测试逻辑, 并通过 cargo test 命令批量执行它们。
 
 Rust 中通常将单元测试代码和被测试代码放在一个文件中。
 
@@ -2150,34 +2150,34 @@ Rust 中通常将单元测试代码和被测试代码放在一个文件中。
 // ...
 #[cfg(test)]
 mod tests {
-    // 因为是子模块，因此需要使用 super 关键字来引用父模块
-    use super::{Serializer, TodoItem};
+  // 因为是子模块, 因此需要使用 super 关键字来引用父模块
+  use super::{Serializer, TodoItem};
 
-    #[test]
-    fn test_todo_item_creation() {
-        let item = TodoItem::new("test1", "content");
-        assert_eq!(item.title, "test");
-        assert_eq!(item.content, "content");
-    }
+  #[test]
+  fn test_todo_item_creation() {
+    let item = TodoItem::new("test1", "content");
+    assert_eq!(item.title, "test");
+    assert_eq!(item.content, "content");
+  }
 
-    #[test]
-    fn test_serialization_roundtrip() {
-        let original = TodoItem::new("test", "content");
-        let serialized = original.serialize();
-        let deserialized = TodoItem::deserialize(serialized);
+  #[test]
+  fn test_serialization_roundtrip() {
+    let original = TodoItem::new("test", "content");
+    let serialized = original.serialize();
+    let deserialized = TodoItem::deserialize(serialized);
 
-        assert_eq!(original.title, deserialized.title);
-        assert_eq!(original.content, deserialized.content);
-    }
+    assert_eq!(original.title, deserialized.title);
+    assert_eq!(original.content, deserialized.content);
+  }
 }
 ```
 
-以上代码中，我们添加了两个测试函数：
+以上代码中, 我们添加了两个测试函数:
 
 - `test_todo_item_creation`: 验证 `TodoItem::new`方法能否正确赋值。
 - `test_serialization_roundtrip`: 验证结构体能否被序列化后再还原回来。
 
-在 `src/todo/core.rs` 文件中增加以上内容后，运行 `cargo test` 命令，Rust 就会进行测试了。
+在 `src/todo/core.rs` 文件中增加以上内容后, 运行 `cargo test` 命令, Rust 就会进行测试了。
 
 ```bash
 test todo::core::tests::test_serialization_roundtrip ... ok
@@ -2200,7 +2200,7 @@ failures:
 test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-可以看见 `todo::core::tests::test_todo_item_creation` 方法报错了，说明内容:
+可以看见 `todo::core::tests::test_todo_item_creation` 方法报错了, 说明内容:
 
 ```bash
 assertion `left == right` failed
@@ -2208,9 +2208,9 @@ assertion `left == right` failed
  right: "test"
 ```
 
-意思是断言失败了，因为两个值不匹配。
-回到测试代码，把 `let item = TodoItem::new("test1", "content");` 中写错的 `test1` 改为 `test`。
-重新运行 `cargo test` 命令，结果如下:
+意思是断言失败了, 因为两个值不匹配。
+回到测试代码, 把 `let item = TodoItem::new("test1", "content");` 中写错的 `test1` 改为 `test`。
+重新运行 `cargo test` 命令, 结果如下:
 
 ```bash
 running 2 tests
@@ -2220,63 +2220,63 @@ test todo::core::tests::test_serialization_roundtrip ... ok
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-说明我们的测试全部通过，功能符合预期。
+说明我们的测试全部通过, 功能符合预期。
 
 ### 断言
 
-断言是指在程序中设置检查点，当程序执行到这些检查点时，会对程序的状态进行检查。
-如果检查结果为真，程序继续执行；如果检查结果为假，程序会抛出异常，终止执行。
+断言是指在程序中设置检查点, 当程序执行到这些检查点时, 会对程序的状态进行检查。
+如果检查结果为真, 程序继续执行；如果检查结果为假, 程序会抛出异常, 终止执行。
 
-Rust 中常用的断言有以下几种：
+Rust 中常用的断言有以下几种:
 
-- `assert!(expr)`: 如果 `expr` 为假，抛出异常。
-- `assert_eq!(left, right)`: 如果 `left` 不等于 `right`，抛出异常。
-- `assert_ne!(left, right)`: 如果 `left` 等于 `right`，抛出异常。
+- `assert!(expr)`: 如果 `expr` 为假, 抛出异常。
+- `assert_eq!(left, right)`: 如果 `left` 不等于 `right`, 抛出异常。
+- `assert_ne!(left, right)`: 如果 `left` 等于 `right`, 抛出异常。
 
-如果加上 `debug_` 前缀，则只在 `Debug` 模式运行，如 `debug_assert!(expr)`。
+如果加上 `debug_` 前缀, 则只在 `Debug` 模式运行, 如 `debug_assert!(expr)`。
 
 ### 条件编译
 
-在测试部分的代码中，我们可以看见在模块 `tests` 上的 `#[cfg(test)]`。
+在测试部分的代码中, 我们可以看见在模块 `tests` 上的 `#[cfg(test)]`。
 
 它用于进行条件编译。表示 `tests` 的代码仅在满足 `test` 条件时进行编译。
 即只在 `cargo test` 命令执行时才会编译。
 
-除了 `test` 条件外，我们还可以增加更多的条件，例如:
+除了 `test` 条件外, 我们还可以增加更多的条件, 例如:
 
 - `#[cfg(all(target_os="windows", test))]` 表示仅在编译对象为 `windows` 平台时运行 `cargo test` 编译。
 - `#[cfg(all(any(target_os = "ios", target_os = "android"), test))]` 表示仅在编译对象为移动端时运行 `cargo test` 编译。
 - `#[cfg(all(not(any(target_os = "ios", target_os = "android")), test))]` 表示仅在编译对象非移动端时运行 `cargo test` 编译。
 
-条件编译可以用在许多地方，小到一个变量，大到一个模块都可以使用条件编译。
+条件编译可以用在许多地方, 小到一个变量, 大到一个模块都可以使用条件编译。
 
 ## 总结
 
-通过本文的学习，我们不仅迈出了 Rust 编程的第一步，更通过亲手实现一个 Todo CLI，将理论知识转化为实际应用能力。
-从最初的 “Hello, world!” 输出，到最终能通过命令行创建、列出 Todo 项并实现数据持久化，我们逐步掌握了 Rust 从基础语法到核心特性的关键知识点。
+通过本文的学习, 我们不仅迈出了 Rust 编程的第一步, 更通过亲手实现一个 Todo CLI, 将理论知识转化为实际应用能力。
+从最初的 “Hello, world!” 输出, 到最终能通过命令行创建、列出 Todo 项并实现数据持久化, 我们逐步掌握了 Rust 从基础语法到核心特性的关键知识点。
 
-在这个过程中，我们深入理解了 Rust 区别于其他语言的核心设计：
+在这个过程中, 我们深入理解了 Rust 区别于其他语言的核心设计:
 
 - 所有权系统通过严格的内存管理规则避免悬垂指针和重复释放问题。
 - 借用与生命周期机制确保引用的有效性。
 - 特征与泛型则实现了灵活的代码抽象与复用。
 
-同时，我们也实践了 Rust 工程化开发的关键环节，
+同时, 我们也实践了 Rust 工程化开发的关键环节。
 使用 cargo 管理项目与依赖、通过模块化拆分代码结构。
-借助 `serde` 和 `clap` 等第三方库提升开发效率，以及通过单元测试保障代码质量。
+借助 `serde` 和 `clap` 等第三方库提升开发效率, 以及通过单元测试保障代码质量。
 
-然而，当前的 Todo CLI 仍有较大优化空间：
+然而, 当前的 Todo CLI 仍有较大优化空间:
 
-目前的功能仅支持 create（创建）和 list（列表）两个命令，缺乏对 Todo 项的删除和修改功能，无法应对日常使用中 “任务变更” 的场景。
+目前的功能仅支持 create（创建）和 list（列表）两个命令, 缺乏对 Todo 项的删除和修改功能, 无法应对日常使用中 “任务变更” 的场景。
 
-Todo 项数据仅包含标题和内容，缺少状态标记（如 “已完成”“未完成”），难以跟踪任务进度。
+Todo 项数据仅包含标题和内容, 缺少状态标记（如 “已完成”“未完成”）, 难以跟踪任务进度。
 
-此外，命令行交互的容错性、筛选功能的精细化（如按状态筛选）等细节也有待完善。
+此外, 命令行交互的容错性、筛选功能的精细化（如按状态筛选）等细节也有待完善。
 
 但这些不足恰恰是深入学习的契机。
 
-我们可以尝试通过扩展功能、优化实现，我们可以进一步巩固 Rust 的模式匹配、错误处理、枚举设计等知识点。
-真正将 “内存安全”“高性能” 的特性融入实际开发中，让这个简单的工具逐渐成长为一个实用、健壮的生产力工具。
+我们可以尝试通过扩展功能、优化实现, 我们可以进一步巩固 Rust 的模式匹配、错误处理、枚举设计等知识点。
+真正将 “内存安全”“高性能” 的特性融入实际开发中, 让这个简单的工具逐渐成长为一个实用、健壮的生产力工具。
 
 ## 参考内容
 
