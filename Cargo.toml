@@ -2,7 +2,7 @@
 name = "cli"
 version = "0.1.0"
 edition = "2021"
-author = ["inksha <admin@inksha.com>"]
+authors = ["inksha <admin@inksha.com>"]
 description = "one simple Rust tutorial"
 repository = "https://github.com/InkSha/rust-tutorial.git"
 license = "MIT"
