@@ -941,15 +941,15 @@ impl TodoItem {
 
 ### self 和 Self
 
-在上方代码中，我们可以在结构体实例函数的参数处看见 `self` 关键字。
+在上方代码中, 我们可以在结构体实例函数的参数处看见 `self` 关键字。
 它表示当前实例。相当于其他语言中的 `this`, `self`。
 
 我们可以通过 `self.title`, `self.content` 这样的方式来访问当前实例属性。
 
-除此之外，它与其他参数并没有什么区别。
+除此之外, 它与其他参数并没有什么区别。
 
 而 `Self` 则表示当前类型。等价于直接使用类型名称。
-但可以在类型重命名等情况下保持代码不变，使得代码更具有稳定性和可读性。
+但可以在类型重命名等情况下保持代码不变, 使得代码更具有稳定性和可读性。
 
 ### 文件操作
 
@@ -1048,7 +1048,7 @@ match args[1].as_str() {
 - 命令的参数结构难以统一组织和扩展。
 - 无法自动生成 --help 等提示信息。
 
-为解决此问题，我们将结合 Rust 的枚举和引入第三方库 `clap` 来构建维护性和扩展性更强的 CLI 程序。
+为解决此问题, 我们将结合 Rust 的枚举和引入第三方库 `clap` 来构建维护性和扩展性更强的 CLI 程序。
 
 > clap 是一个强大的 Rust 库, 用于解析命令行参数。它支持自动生成命令行参数的帮助信息, 并支持丰富的参数类型和校验规则。
 
@@ -1060,17 +1060,17 @@ cargo add clap --features derive # 增加依赖并启用 derive 功能
 
 ### 为什么使用枚举
 
-枚举，在各种编程语言中或多或少都有着它的身影。
+枚举, 在各种编程语言中或多或少都有着它的身影。
 
-它的作用是用于表示一组有限的、互斥的可能取值，例如周一到周日，性别等。
+它的作用是用于表示一组有限的、互斥的可能取值, 例如周一到周日, 性别等。
 
-与其他语言的枚举相比，Rust 的枚举更加灵活和强大：
+与其他语言的枚举相比, Rust 的枚举更加灵活和强大：
 
 - 支持每个变体携带不同的数据。
-- 可与模式匹配强结合，做复杂的控制流。
-- 可以和 `trait`、方法一起使用，实现丰富的抽象设计。
+- 可与模式匹配强结合, 做复杂的控制流。
+- 可以和 `trait`、方法一起使用, 实现丰富的抽象设计。
 
-这使得枚举天然适合表示 CLI 的命令结构：每个命令对应一个枚举变体，每个变体携带所需参数。
+这使得枚举天然适合表示 CLI 的命令结构：每个命令对应一个枚举变体, 每个变体携带所需参数。
 
 ### 声明枚举
 
@@ -1089,10 +1089,10 @@ pub enum TodoCommand {
 }
 ```
 
-以上代码定义了一个名为 `TodoCommand` 的枚举，它有两个枚举值，分别是 `Create` 和 `List`。
+以上代码定义了一个名为 `TodoCommand` 的枚举, 它有两个枚举值, 分别是 `Create` 和 `List`。
 我们使用了派生宏 `#[derive(Debug, Clone, Subcommand)]` 为枚举自动实现 `Debug`、`Clone` 和 `Subcommand` 三个特征。
 
-`Subcommand` 特征告诉 clap 该枚举对应一个子命令。
+`Subcommand` 特征告诉 `clap` 该枚举对应一个子命令。
 
 ### 解析命令行参数
 
@@ -1127,9 +1127,9 @@ fn main() {
 
 以上代码中, 我们定义了一个 `Program` 结构体, 它有一个字段 `command` 用于接收子命令。
 
-`#[command(version, about, long_about = "Todo Cli")]` 告诉 clap 自动生成 --version 和 --help 两个参数。
+`#[command(version, about, long_about = "Todo Cli")]` 告诉 `clap` 自动生成 --version 和 --help 两个参数。
 
-`#[command(subcommand)]` 告诉 clap 该字段对应一个子命令。
+`#[command(subcommand)]` 告诉 `clap` 该字段对应一个子命令。
 
 运行 `cargo run -- --help` 可以看到自动生成的帮助信息:
 
@@ -1153,10 +1153,10 @@ Options:
 
 ### Rust 注释
 
-在上面的例子中，我们给 TodoCommand 的每个枚举项添加了文档注释。
-但是当我们运行 `--help` 时，注释内容却自动出现在帮助信息中。
+在上面的例子中, 我们给 TodoCommand 的每个枚举项添加了文档注释。
+但是当我们运行 `--help` 时, 注释内容却自动出现在帮助信息中。
 
-这可能让人疑惑：我们只是加了一些注释，为什么这些注释会出现在运行时输出的帮助信息里？
+这可能让人疑惑：我们只是加了一些注释, 为什么这些注释会出现在运行时输出的帮助信息里？
 
 这是因为在 Rust 中的注释有三种方式。
 
@@ -1175,7 +1175,7 @@ Options:
 我们用到的就是 `/// xxx` 即文档注释。它是编译器可识别的元信息。
 文档注释的内容会被编译器和第三方工具解析为注释对象的文档说明。
 
-`clap` 通过它的派生宏 `#[derive(Subcommand)]` 来在编译期间获取结构体和枚举的元信息，其中就有文档注释。
+`clap` 通过它的派生宏 `#[derive(Subcommand)]` 来在编译期间获取结构体和枚举的元信息, 其中就有文档注释。
 因此, 文档注释的内容会出现在运行时输出的帮助信息里。
 
 ### 枚举变体
@@ -1201,9 +1201,9 @@ pub enum TodoCommand {
 
 分别对应 `--title` 和 `--content` 参数。
 
-`#[arg(short, long)]` 告诉 clap 该字段对应一个参数, 并指定参数的短名称和长名称。
+`#[arg(short, long)]` 告诉 `clap` 该字段对应一个参数, 并指定参数的短名称和长名称。
 
-执行 `cargo run -- create --help`，可以看到自动生成的帮助信息:
+执行 `cargo run -- create --help`, 可以看到自动生成的帮助信息:
 
 ```bash
 Create a new todo item
@@ -1235,7 +1235,7 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
 }
 ```
 
-模式匹配是相当强大的，可以将枚举值的字段解构出,
+模式匹配是相当强大的, 可以将枚举值的字段解构出,
 修改 `main.rs`：
 
 ```rust
@@ -1247,11 +1247,11 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: String, content: String) {
 // ...
 ```
 
-随后，我们就可以使用 `cargo run -- create --title t --content c` 来创建 Todo 而不需要进入交互式界面了。
+随后, 我们就可以使用 `cargo run -- create --title t --content c` 来创建 Todo 而不需要进入交互式界面了。
 
 ### 可选参数
 
-目前，我们的 `create` 命令的参数都是必填的。
+目前, 我们的 `create` 命令的参数都是必填的。
 但是这样我们没法区分到底是使用命令行参数还是交互式界面来创建 Todo 项。
 
 因此我们需要使用可选参数。
@@ -1265,7 +1265,7 @@ pub enum Option<T> {
 }
 ```
 
-可以看见，枚举 `Option<T>` 就有两个枚举值。分别是 `Some(T)` 和 `None`，分别代表有值和无值。
+可以看见, 枚举 `Option<T>` 就有两个枚举值。分别是 `Some(T)` 和 `None`, 分别代表有值和无值。
 
 将 `TodoCommand` 枚举改为如下内容:
 
@@ -1310,20 +1310,20 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
   // ...
 ```
 
-改造完毕后，我们的 `create` 命令可以不指定参数进入交互式界面创建 Todo，也可以指定参数直接创建 Todo 了。
+改造完毕后, 我们的 `create` 命令可以不指定参数进入交互式界面创建 Todo, 也可以指定参数直接创建 Todo 了。
 
 ### 泛型
 
-在前面的例子中，我们使用了 `Option<String>` 来表示将参数变得可选。
-那么，`Option<T>` 中的 `T` 是从哪里来的？为什么我们只需要将 `T` 替换为 `String`，就能让参数变得可选？
+在前面的例子中, 我们使用了 `Option<String>` 来表示将参数变得可选。
+那么, `Option<T>` 中的 `T` 是从哪里来的？为什么我们只需要将 `T` 替换为 `String`, 就能让参数变得可选？
 
-因为这里的 `T` 是一个泛型。它并不是某个具体的值，而是作为一个占位符被用来指代一个将来会具体指定的类型。
+因为这里的 `T` 是一个泛型。它并不是某个具体的值, 而是作为一个占位符被用来指代一个将来会具体指定的类型。
 
-Rust 是一门静态类型语言，拥有强大而灵活的类型系统。
-为了保证类型安全，Rust 要求在编译期间就确定所有变量和参数的类型。
-这虽然增强了代码的可靠性，但也带来了一个问题：我们往往需要为不同的类型编写大量结构相似但类型不同的代码。
+Rust 是一门静态类型语言, 拥有强大而灵活的类型系统。
+为了保证类型安全, Rust 要求在编译期间就确定所有变量和参数的类型。
+这虽然增强了代码的可靠性, 但也带来了一个问题：我们往往需要为不同的类型编写大量结构相似但类型不同的代码。
 
-例如翻转一个元组，如果不使用泛型，将是这样的。
+例如翻转一个元组, 如果不使用泛型, 将是这样的。
 
 ```rust
 fn reverse_i8_tuple(tuple: (i8, i8)) -> (i8, i8) {
@@ -1337,14 +1337,14 @@ fn reverse_u8_tuple(tuple: (u8, u8)) -> (u8, u8) {
 }
 ```
 
-为了解决类型重复的问题，许多静态类型语言都引入了**泛型（Generics）**这一机制，Rust 也不例外。
-泛型允许我们编写与具体类型无关的通用代码，从而在保持类型安全的同时避免重复劳动。
+为了解决类型重复的问题, 许多静态类型语言都引入了**泛型（Generics）**这一机制, Rust 也不例外。
+泛型允许我们编写与具体类型无关的通用代码, 从而在保持类型安全的同时避免重复劳动。
 
-当我们将 `String` 传入 `Option<T>`， `Option<T>` 就变成了 `Option<String>`。`T` 从一个广泛的类型收缩为一个明确的 `String` 类型。
+当我们将 `String` 传入 `Option<T>`,  `Option<T>` 就变成了 `Option<String>`。`T` 从一个广泛的类型收缩为一个明确的 `String` 类型。
 
 我们需要为每个类型单独实现一个方法。
 
-但如果使用泛型，在需要泛型的内容后面追加一个 `<T>` 即可:
+但如果使用泛型, 在需要泛型的内容后面追加一个 `<T>` 即可:
 
 ```rust
 fn reverse<T>(args: (T, T)) -> (T, T) {
@@ -1353,15 +1353,15 @@ fn reverse<T>(args: (T, T)) -> (T, T) {
 }
 ```
 
-于是，我们就可以使用 `reverse` 方法来翻转任意类型的元组了。
+于是, 我们就可以使用 `reverse` 方法来翻转任意类型的元组了。
 
 ```rust
 let a = reverse((1, 2));
 let b = reverse(("a", "b"));
 ```
 
-需要注意的是，`T` 并不是固定的名称，只是约定成俗将泛型参数命名为 `T`。
-只要开发者愿意，那么将泛型可以是任何符合变量命名规则的名称。
+需要注意的是, `T` 并不是固定的名称, 只是约定成俗将泛型参数命名为 `T`。
+只要开发者愿意, 那么将泛型可以是任何符合变量命名规则的名称。
 
 下面的示例展示了如何使用多个自定义命名的泛型参数：
 
@@ -1374,7 +1374,7 @@ fn reverse<Rust_1, Rust_2>(args: (Rust_1, Rust_2)) -> (Rust_2, Rust_1) {
 
 ### if let
 
-在前面的代码中，我们对可选参数进行了模式匹配。
+在前面的代码中, 我们对可选参数进行了模式匹配。
 
 ```rust
 match title {
@@ -1387,9 +1387,9 @@ match title {
 }
 ```
 
-虽然功能正确，但代码稍显冗长，尤其当我们只关心某一个具体模式时。
+虽然功能正确, 但代码稍显冗长, 尤其当我们只关心某一个具体模式时。
 
-Rust 提供了一个 `if let` 语法糖，用来匹配并解构某个特定的枚举变体，而忽略其他所有可能的枚举值。
+Rust 提供了一个 `if let` 语法糖, 用来匹配并解构某个特定的枚举变体, 而忽略其他所有可能的枚举值。
 
 于是我们可以将 `create_todo` 改为这样:
 
@@ -1411,16 +1411,16 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
   // ...
 ```
 
-这段代码的意思是如果 `title` 可以匹配出 `Some(arg_title)`，则将 `arg_title` 解构出并判断是否为空。
-而如果无法匹配，则什么都不做。
+这段代码的意思是如果 `title` 可以匹配出 `Some(arg_title)`, 则将 `arg_title` 解构出并判断是否为空。
+而如果无法匹配, 则什么都不做。
 
-可以看见，相较于之前，代码简化了不少。
+可以看见, 相较于之前, 代码简化了不少。
 
 ## 查找 Todo
 
-我们将 `create` 命令功能基本完善了，它可以使用命令行参数和交互式界面两种方式来创建 Todo 项。
+我们将 `create` 命令功能基本完善了, 它可以使用命令行参数和交互式界面两种方式来创建 Todo 项。
 
-但是我们的 `list` 命令还相对简陋，它只能列出所有的 Todo 项，而无法根据条件筛选 Todo 项。
+但是我们的 `list` 命令还相对简陋, 它只能列出所有的 Todo 项, 而无法根据条件筛选 Todo 项。
 因此我们需要完善它。
 
 ### 筛选 Todo
@@ -1434,8 +1434,8 @@ pub struct TodoItemFilter {
 }
 ```
 
-`TodoItemFilter` 将具有两个属性，分别代表需要筛选的 `title` 和 `content` 内容。
-因为可能只需要筛选其中一个，因此将两者均设为 `Option<String>` 属性表示可选的。
+`TodoItemFilter` 将具有两个属性, 分别代表需要筛选的 `title` 和 `content` 内容。
+因为可能只需要筛选其中一个, 因此将两者均设为 `Option<String>` 属性表示可选的。
 
 接下来我们将为它实现一些方法。
 
@@ -1452,17 +1452,17 @@ impl TodoItemFilter {
 }
 ```
 
-在一开始，我们并没有办法知道需要筛选什么内容，因此将 `title` 和 `content` 均设为 `None`。
+在一开始, 我们并没有办法知道需要筛选什么内容, 因此将 `title` 和 `content` 均设为 `None`。
 
 ### 泛型约束
 
-在之前代码中，我们了解到了用来占位表示任何类型的泛型。
-但仅仅只是一个 `T` 的范围就太大了。例如我们可能需要的参数是一个字符串，但却可以将数字，布尔传递进来。
+在之前代码中, 我们了解到了用来占位表示任何类型的泛型。
+但仅仅只是一个 `T` 的范围就太大了。例如我们可能需要的参数是一个字符串, 但却可以将数字, 布尔传递进来。
 
-为解决这个问题，Rust 支持对泛型进行类型约束，使得泛型参数必须满足特定的条件。
+为解决这个问题, Rust 支持对泛型进行类型约束, 使得泛型参数必须满足特定的条件。
 因此我们需要对泛型进行进一步的约束。
 
-例如，我们希望参数可以转换为字符串类型，那么可以使用 `Into<String>` 作为约束条件。
+例如, 我们希望参数可以转换为字符串类型, 那么可以使用 `Into<String>` 作为约束条件。
 `Into<String>` 表示“任何可以转换成 `String` 的类型”。
 
 ```rust
@@ -1479,11 +1479,11 @@ impl TodoItemFilter {
 ```
 
 上方代码分别为 `TodoItemFilter` 实现 `set_title` 和 `set_content` 方法。
-我们不关心参数 `T` 具体是什么类型，只要它满足约束条件 `Into<String>` 就行。
-无论 `T` 是 `String` 类型，还是 `&str` 类型，抑或是 `Vec<u8>` 类型，只要它可以被转换为 `String` 类型，都可以作为参数传入。
+我们不关心参数 `T` 具体是什么类型, 只要它满足约束条件 `Into<String>` 就行。
+无论 `T` 是 `String` 类型, 还是 `&str` 类型, 抑或是 `Vec<u8>` 类型, 只要它可以被转换为 `String` 类型, 都可以作为参数传入。
 
-类型约束有两种写法，上面的是第一种，直接将约束条件写在泛型参数位置，更加常用。
-第二种则是使用 `where` 子句单独列出，适用于复杂约束情况。
+类型约束有两种写法, 上面的是第一种, 直接将约束条件写在泛型参数位置, 更加常用。
+第二种则是使用 `where` 子句单独列出, 适用于复杂约束情况。
 
 ```rust
 impl TodoItemFilter {
@@ -1500,7 +1500,7 @@ impl TodoItemFilter {
 
 ### 筛选参数
 
-我们目前的 Todo 项具有两项属性，即 `title` 和 `content`。
+我们目前的 Todo 项具有两项属性, 即 `title` 和 `content`。
 我们可以根据这两项属性中的任意一项或两项来筛选 Todo 项。
 
 我们为 `TodoItemFilter` 实现一个 `filter` 方法用于过滤 Todo 项。
@@ -1541,13 +1541,13 @@ pub fn filter(&self, list: &Vec<TodoItem>) {
 
 以上代码为 `TodoItemFilter` 实现的 `filter` 方法。
 它首先创建一个空的 `filtered_list` 用于存储筛选后的 Todo 项。
-如果 `title` 和 `content` 均为空，则直接将所有 Todo 项放入 `filtered_list`。
-否则，遍历所有 Todo 项，根据 `title` 和 `content` 进行筛选。
-如果 Todo 项的 `title` 和 `content` 均包含筛选条件，则将其放入 `filtered_list`。
+如果 `title` 和 `content` 均为空, 则直接将所有 Todo 项放入 `filtered_list`。
+否则, 遍历所有 Todo 项, 根据 `title` 和 `content` 进行筛选。
+如果 Todo 项的 `title` 和 `content` 均包含筛选条件, 则将其放入 `filtered_list`。
 
-最后，遍历 `filtered_list`，打印出筛选后的 Todo 项。
+最后, 遍历 `filtered_list`, 打印出筛选后的 Todo 项。
 
-然后我们改造 `TodoCommand` 枚举，为 `list` 命令增加两个参数。
+然后我们改造 `TodoCommand` 枚举, 为 `list` 命令增加两个参数。
 
 ```rust
 // ...
@@ -1561,7 +1561,7 @@ List {
 // ...
 ```
 
-改造 `main` 函数，在 `list` 命令中添加筛选参数。
+改造 `main` 函数, 在 `list` 命令中添加筛选参数。
 
 ```rust
 // ...
@@ -1592,12 +1592,12 @@ pub fn list_todo(todos: &Vec<TodoItem>, title: Option<String>, content: Option<S
 }
 ```
 
-现在，当我们执行 `cargo run -- list` 命令时，可以携带 `--title` 和 `--content` 参数进行筛选了。
+现在, 当我们执行 `cargo run -- list` 命令时, 可以携带 `--title` 和 `--content` 参数进行筛选了。
 
 ## 特征
 
-在为 `list` 命令实现 `set_title` 和 `set_content` 方法时，我们使用了 `Into<String>` 进行类型约束。
-但 `Into<T>` 并非是类型，它是一个特征, 是 Rust 用于定义行为约定的一种机制。可以为类型定义统一的能力规范。
+在为 `list` 命令实现 `set_title` 和 `set_content` 方法时, 我们使用了 `Into<String>` 进行类型约束。
+但 `Into<T>` 并非是类型, 它是一个特征, 是 Rust 用于定义行为约定的一种机制。可以为类型定义统一的能力规范。
 
 我们可以将 Rust 中的特征看作是其他语言中的接口。
 
@@ -1605,7 +1605,7 @@ Rust 内置了许多特征。例如 `Into<T>` 表示可以将类型转换为 `T`
 `Copy` 和 `Clone` 可以表示一个类型是否可以被复制等等。
 
 在最开始我们编写程序时就遇到过一个涉及特征的错误。
-`String` 类型没有实现 `Copy` 特征，因此无法直接将参数赋值。
+`String` 类型没有实现 `Copy` 特征, 因此无法直接将参数赋值。
 
 ```bash
 6 |   let title = args[1];
@@ -1622,7 +1622,7 @@ trait PrintName {
 }
 ```
 
-与枚举一样，特征只要使用了 `pub` 修饰，那么它的方法就全部可供外部访问。
+与枚举一样, 特征只要使用了 `pub` 修饰, 那么它的方法就全部可供外部访问。
 
 ### 实现特征
 
@@ -1640,26 +1640,16 @@ impl PrintName for TodoItem {
 }
 ```
 
-如果觉得每个类型都要实现一遍 `PrintName` 特征太麻烦，也可以为特征定义默认实现。
+倘若需要为类型 A 实现特征 B, 那么两者必须有一个是在当前作用域中定义的。否则将无效。
+例如想为 `String` 实现 `Copy` 特征, 但两者都定义在标准库中而不在当前作用域, 因此无法实现。
 
-```rust
-trait PrintName {
-  fn PrintName(&self) -> String {
-    return "Unknow Name".to_string();
-  }
-}
-```
-
-倘若需要为类型 A 实现特征 B，那么两者必须有一个是在当前作用域中定义的。否则将无效。
-例如想为 `String` 实现 `Copy` 特征，但两者都定义在标准库中而不在当前作用域，因此无法实现。
-
-这个规则被称为孤儿规则，它确保了他人编写的代码不会破坏我们的代码，我们也不会莫名其妙破坏他人的代码。
+这个规则被称为孤儿规则, 它确保了他人编写的代码不会破坏我们的代码, 我们也不会莫名其妙破坏他人的代码。
 
 ### 特征约束
 
-前面我们使用到了特征约束，即 `T: Into<String>`。它表示 `T` 必须实现 `Into<String>` 特征。
+前面我们使用到了特征约束, 即 `T: Into<String>`。它表示 `T` 必须实现 `Into<String>` 特征。
 
-特征约束不仅可以约束泛型，也可以约束特征自身。
+特征约束不仅可以约束泛型, 也可以约束特征自身。
 
 ```rust
 trait PrintName: Display {
@@ -1667,7 +1657,7 @@ trait PrintName: Display {
 }
 ```
 
-以上代码为 `PrintName` 特征的定义，它要求实现对象必须实现 `Display` 特征才能实现它。
+以上代码为 `PrintName` 特征的定义, 它要求实现对象必须实现 `Display` 特征才能实现它。
 可以使用 `+` 号增加更多的约束。例如 `trait PrintName: Display + Clone` 表示 `PrintName` 必须实现 `Display` 和 `Clone` 特征才能实现它。
 
 ### 参数约束
@@ -1692,51 +1682,51 @@ fn printName<T: PrintName>(item: &T) {
 
 ## 为 TodoItem 实现特征
 
-在先前的开发中，我们为 `TodoItem` 实现了序列化和反序列化方法。这两种方法在开发过程中相当常见。
+在先前的开发中, 我们为 `TodoItem` 实现了序列化和反序列化方法。这两种方法在开发过程中相当常见。
 我们如果要为每个方法都去实现一遍有点太繁琐了。
 
-因此，我们可以声明一个特征，从而将这些通用行为给抽离出来。
+因此, 我们可以声明一个特征, 从而将这些通用行为给抽离出来。
 
 首先定义 `Serializer` 特征表示序列化和反序列化方法集合。然后为 `TodoItem` 实现 `Serializer` 特征。
 
 ```rust
 pub trait Serializer {
-    fn serialize(&self) -> String;
-    fn deserialize<S: Into<String>>(s: S) -> Self;
+  fn serialize(&self) -> String;
+  fn deserialize<S: Into<String>>(s: S) -> Self;
 }
 
 impl Serializer for TodoItem {
-    fn deserialize<S: Into<String>>(s: S) -> Self {
-        serde_json::from_str(&s.into()).unwrap()
-    }
+  fn deserialize<S: Into<String>>(s: S) -> Self {
+    serde_json::from_str(&s.into()).unwrap()
+  }
 
-    fn serialize(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
+  fn serialize(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
 }
 ```
 
 ### 默认实现特征
 
-以上代码中，尽管我们已经将序列化和反序列化方法抽离。但仍然需要手动实现方法体。这依然较为繁琐。
+以上代码中, 尽管我们已经将序列化和反序列化方法抽离。但仍然需要手动实现方法体。这依然较为繁琐。
 
 因此我们可以使用默认实现来取消手动实现方法体。
 
 ```rust
 pub trait Serializer {
-    fn serialize(&self) -> String {
-      serde_json::to_string(self).unwrap()
-    }
+  fn serialize(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
 
-    fn deserialize<S: Into<String>>(s: S) -> Self {
-      serde_json::from_str(&s.into()).unwrap()
-    }
+  fn deserialize<S: Into<String>>(s: S) -> Self {
+    serde_json::from_str(&s.into()).unwrap()
+  }
 }
 
 impl Serializer for TodoItem {}
 ```
 
-将代码改成以上内容，然后运行。会发现有报错。我们先解决 `serialize` 方法的报错。
+将代码改成以上内容, 然后运行。会发现有报错。我们先解决 `serialize` 方法的报错。
 
 ```bash
 error[E0277]: the trait bound `Self: Serialize` is not satisfied
@@ -1772,32 +1762,32 @@ help: consider further restricting `Self`
 serde_json::ser
 pub fn to_string<T>(value: &T) -> Result<String>
 where
-    T: ?Sized + Serialize,
+  T: ?Sized + Serialize,
 // ...
 ```
 
-可以看见，它使用了 `where` 子句，要求 `T` 类型必须实现 `?Sized` 和 `Serialize` 特征。
+可以看见, 它使用了 `where` 子句, 要求 `T` 类型必须实现 `?Sized` 和 `Serialize` 特征。
 
 我们将类型约束补上。
 
 ```rust
 pub trait Serializer
 where
-    Self: Sized + Serialize,
+  Self: Sized + Serialize,
 {
-    fn serialize(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
+  fn serialize(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
 
-    fn deserialize<S: Into<String>>(s: S) -> Self {
-        serde_json::from_str(&s.into()).unwrap()
-    }
+  fn deserialize<S: Into<String>>(s: S) -> Self {
+    serde_json::from_str(&s.into()).unwrap()
+  }
 }
 
 impl Serializer for TodoItem {}
 ```
 
-再次运行，`serialize` 方法不再报错，现在只剩下 `deserialize` 方法的报错了。
+再次运行, `serialize` 方法不再报错, 现在只剩下 `deserialize` 方法的报错了。
 
 `deserialize` 方法的报错如下:
 
@@ -1824,28 +1814,28 @@ help: consider further restricting `Self`
      |                                                   +++++++++++++++++++++++++++
 ```
 
-报错信息: ```the trait bound `Self: Deserialize<'_>` is not satisfied``` 可以看见，也是因为没有满足类型约束导致的。
+报错信息: ```the trait bound `Self: Deserialize<'_>` is not satisfied``` 可以看见, 也是因为没有满足类型约束导致的。
 
 编译器也有提示我们增加约束。
 
-补上约束，代码如下:
+补上约束, 代码如下:
 
 ```rust
 pub trait Serializer
 where
-    Self: Sized + Serialize + Deserialize<'_>,
+  Self: Sized + Serialize + Deserialize<'_>,
 {
-    fn serialize(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
+  fn serialize(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
 
-    fn deserialize<S: Into<String>>(s: S) -> Self {
-        serde_json::from_str(&s.into()).unwrap()
-    }
+  fn deserialize<S: Into<String>>(s: S) -> Self {
+    serde_json::from_str(&s.into()).unwrap()
+  }
 }
 ```
 
-重新运行，`deserialize` 的报错消失了。但出现了新的报错:
+重新运行, `deserialize` 的报错消失了。但出现了新的报错:
 
 ```bash
 error[E0637]: `'_` cannot be used here
@@ -1857,16 +1847,16 @@ error[E0637]: `'_` cannot be used here
 For more information about this error, try `rustc --explain E0637`.
 ```
 
-报错信息: ``` `'_` cannot be used here```，表示这里不能使用 `'_`，
+报错信息: ``` `'_` cannot be used here```, 表示这里不能使用 `'_`,
 ``` `'_` is a reserved lifetime name``` 提示我们 `'_` 是保留的生命周期名称。
 
 ### 生命周期
 
-生命周期，通常指某个事物从开始到结束的一个完整的过程。
+生命周期, 通常指某个事物从开始到结束的一个完整的过程。
 
-在 Rust 中，它是一个编译期概念，用于检查引用是否合法，避免悬垂指针等问题。
-通常情况下，我们不需要手动标注生命周期，编译器会自动推导。
-只有当编译器无法确定时，才需要手动标注。
+在 Rust 中, 它是一个编译期概念, 用于检查引用是否合法, 避免悬垂指针等问题。
+通常情况下, 我们不需要手动标注生命周期, 编译器会自动推导。
+只有当编译器无法确定时, 才需要手动标注。
 
 可以将 Rust 中的生命周期简单的认为就是引用的有效作用域。
 
@@ -1881,24 +1871,24 @@ For more information about this error, try `rustc --explain E0637`.
 }
 ```
 
-以上代码通过花括号被分为两层，在第一层，声明了变量 `r` 但未赋值。
-在第二层，声明了变量 `n`，并将 `n` 的地址赋值给 `r`。
+以上代码通过花括号被分为两层, 在第一层, 声明了变量 `r` 但未赋值。
+在第二层, 声明了变量 `n`, 并将 `n` 的地址赋值给 `r`。
 
-`n` 是一个局部变量，它的生命周期在第二层结束，即花括号结束。
-而 `r` 是一个引用，它指向 `n`，它的生命周期在 `r` 所在的作用域内，即第一层的花括号内。
+`n` 是一个局部变量, 它的生命周期在第二层结束, 即花括号结束。
+而 `r` 是一个引用, 它指向 `n`, 它的生命周期在 `r` 所在的作用域内, 即第一层的花括号内。
 
-`n` 的生命周期比 `r` 的生命周期短，这没有问题。但是 `r` 被赋值为 `n` 的引用，就会导致出问题。
-因为 `n` 会在 `n` 的生命周期结束后被销毁，而 `r` 指向了一个已经被销毁的变量。
+`n` 的生命周期比 `r` 的生命周期短, 这没有问题。但是 `r` 被赋值为 `n` 的引用, 就会导致出问题。
+因为 `n` 会在 `n` 的生命周期结束后被销毁, 而 `r` 指向了一个已经被销毁的变量。
 
 回到新的 `deserialize` 方法报错。`'_` 是一个特殊的生命周期标记。它被用于生命周期省略或临时生命周期标注。
 它可以被编译器自动推导。但在类型约束这里并不被允许。
 
-Rust 要求在类型约束时，必须手动标注明确的生命周期名称。因为编译器无法在这里推断出具体的生命周期。
+Rust 要求在类型约束时, 必须手动标注明确的生命周期名称。因为编译器无法在这里推断出具体的生命周期。
 
-我们将 `'_` 替换为 `'a`，再次运行。
-> 需要注意的是, Rust 的声明周期命名并没有什么特别要求，只是一般通常使用单个小写字母命名。
+我们将 `'_` 替换为 `'a`, 再次运行。
+> 需要注意的是, Rust 的声明周期命名并没有什么特别要求, 只是一般通常使用单个小写字母命名。
 
-原先的报错消失了，新的报错出现了。
+原先的报错消失了, 新的报错出现了。
 
 ### 高阶生命周期绑定
 
@@ -1929,15 +1919,15 @@ help: consider introducing lifetime `'a` here
 以下是几种解决方法的含义：
 
 - `Self: Sized + Serialize + for<'a> Deserialize<'a>`:
-  这是最常见通用的写法，使用了高阶生命周期约束，表示不论 `'a` 是什么生命周期，`Self` 都能实现特征 `Deserialize<'a>`。
+  这是最常见通用的写法, 使用了高阶生命周期约束, 表示不论 `'a` 是什么生命周期, `Self` 都能实现特征 `Deserialize<'a>`。
 
 - `pub trait Serializer<'a>`:
-  这让特征本身携带生命周期参数，可以在该特征的所有方法中使用，但会导致使用特征时需要额外传递生命周期，侵入性较强。
+  这让特征本身携带生命周期参数, 可以在该特征的所有方法中使用, 但会导致使用特征时需要额外传递生命周期, 侵入性较强。
 
 - `for<'a> Self: Sized + Serialize + Deserialize<'a>,`:
-  同样使用了高阶生命周期约束，但 `'a` 被作用于整个约束条件，表示不论 `'a` 是什么生命周期都能让类型约束成立。
+  同样使用了高阶生命周期约束, 但 `'a` 被作用于整个约束条件, 表示不论 `'a` 是什么生命周期都能让类型约束成立。
 
-我们使用第一种即可。改造完毕后，再次运行，这次没有再报错了。
+我们使用第一种即可。改造完毕后, 再次运行, 这次没有再报错了。
 
 ## 参考内容
 
