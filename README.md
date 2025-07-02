@@ -1044,7 +1044,8 @@ pub fn read_todo_list(save_file: &str) -> Vec<TodoItem> {
 }
 
 pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
-    fs::write(save_file, serde_json::to_string(todos).unwrap()).unwrap();
+  let data = serde_json::to_string(todos).unwrap();
+  fs::write(save_file, data).unwrap();
 }
 ```
 
@@ -1466,6 +1467,153 @@ pub fn create_todo(todos: &mut Vec<TodoItem>, title: Option<String>, content: Op
 而如果无法匹配, 则什么都不做。
 
 可以看见, 相较于之前, 代码简化了不少。
+
+## 错误处理
+
+在进行数据持久化时，我们编写了 `save_todo_list` 方法。
+
+```rust
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
+  let data = serde_json::to_string(todos).unwrap();
+  fs::write(save_file, data).unwrap();
+}
+```
+
+虽然这样写能让程序正常运行，但也埋下了隐患。
+即，一旦序列化失败或文件写入失败，就会导致程序崩溃。
+
+我们希望即使程序运行出错也可以正常处理，而不是崩溃。
+因此我们需要引入 Rust 的错误处理机制。
+
+Rust 并没有 `try-catch` 机制。
+而是通过枚举 `Result<T, E>` 来显式处理。
+`T` 表示成功的返回值类型, `E` 表示错误类型。
+
+```rust
+enum Result<T, E> {
+    Ok(T),      // 操作成功时，返回结果 T
+    Err(E),     // 操作失败时，返回错误类型 E
+}
+```
+
+### unwrap 和 expect
+
+我们在 `save_todo_list` 方法中使用了 `unwrap`。它用于从 `Result<T, E>` 中获取值。
+
+- 如果 `Result` 是 `Ok(T)`, 则返回 `T`;
+- 如果 `Result` 是 `Err(E)`, 则程序会崩溃并打印错误信息。
+
+我们也可以使用 `expect` 方法。它与 `unwrap` 类似, 但它会返回一个自定义的错误信息。
+
+```rust
+let data = serde_json::to_string(todos).expect("序列化失败");
+```
+
+但这两种方法都不推荐在正常程序中使用。因为一旦出错就会导致程序崩溃。
+
+更加健壮的方法是使用一个 `match` 来处理 `Result<T, E>`。
+
+```rust
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
+  match serde_json::to_string(todos) {
+    Ok(data) => match fs::write(save_file, data) {
+      Err(msg) => {
+        println!("save file error: {}", msg);
+      }
+      Ok(_) => {
+        println!("save file success");
+      }
+    },
+    Err(msg) => {
+      println!("save file error: {}", msg);
+    }
+  }
+}
+```
+
+这样，即使出错了，程序也能继续运行，并向用户提示错误原因。
+
+### try 运算符
+
+Rust 还提供了一个 `?` 运算符, 用于自动传播错误。它避免了我们层层 `match`。
+
+```rust
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), String> {
+  let data = serde_json::to_string(todos)?;
+  fs::write(save_file, data)?;
+  Ok(())
+}
+```
+
+可当我们直接运行以上代码时，编译器会报错。
+
+```bash
+error[E0277]: `?` couldn't convert the error to `std::string::String`
+  --> src\todo\storage.rs:29:44
+   |
+28 | pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), String> {
+   |                                                                  ------------------ expected `std::string::String` because of this
+29 |     let data = serde_json::to_string(todos)?;
+   |                ----------------------------^ the trait `From<serde_json::Error>` is not implemented for `std::string::String`
+   |                |
+   |                this can't be annotated with `?` because it has type `Result<_, serde_json::Error>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: the following other types implement trait `From<T>`:
+             `std::string::String` implements `From<&mut str>`
+             `std::string::String` implements `From<&std::string::String>`
+             `std::string::String` implements `From<&str>`
+             `std::string::String` implements `From<Box<str>>`
+             `std::string::String` implements `From<Cow<'_, str>>`
+             `std::string::String` implements `From<Id>`
+             `std::string::String` implements `From<char>`
+             `std::string::String` implements `From<clap::builder::Str>`
+   = note: required for `Result<(), std::string::String>` to implement `FromResidual<Result<Infallible, serde_json::Error>>`
+```
+
+这是因为只有当返回类型是 `Result` 且错误一致时，才能够使用 `?`。
+
+我们可以看到报错信息：``` `?` couldn't convert the error to `std::string::String` ``` ,
+
+错误原因是 `save_todo_list` 返回 `Result<(), String>`，但 `serde_json::to_string(...)` 的错误类型是 `serde_json::Error`，
+? 运算符尝试将 `serde_json::Error` 转换为 `String`，但 `From<serde_json::Error> for String` 并未实现。
+
+于是我们需要对错误进行转换, 使得返回的类型与 `save_todo_list` 函数一致。
+
+### 函数闭包
+
+我们可以使用闭包来解决这个问题。
+
+闭包是一种匿名函数, 除了可以接受参数外，还可以捕获其环境中的变量。
+除此之外，闭包还可以作为参数传递给函数。
+
+语法如下:
+
+```rust
+{
+  let x = 5;
+  // 类型标注不是必须的
+  let add_x = |y: i32| -> i32 {
+    return x + y;
+  }
+  println!("{}", add_x(3));
+}
+```
+
+如果只有一个返回表达式，可以简化为 `let add_x = |y| x + y;`。
+
+认识了闭包之后，我们就可以改造 `save_todo_list` 了。
+使用 `map_err` 函数，传递一个闭包，将可能发生的错误统一转换为 `String` 类型。
+
+```rust
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), String> {
+  let data = serde_json::to_string(todos).map_err(|e| e.to_string())?;
+  fs::write(save_file, data).map_err(|e| e.to_string())?;
+  Ok(())
+}
+```
+
+重新运行，这下就可以正常工作了。
 
 ## 查找 Todo
 

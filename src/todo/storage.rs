@@ -25,6 +25,9 @@ pub fn read_todo_list(save_file: &str) -> Vec<TodoItem> {
     return result;
 }
 
-pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) {
-    fs::write(save_file, serde_json::to_string(todos).unwrap()).unwrap();
+pub fn save_todo_list(save_file: &str, todos: &Vec<TodoItem>) -> Result<(), String> {
+    let data = serde_json::to_string(todos).map_err(|e| e.to_string())?;
+    fs::write(save_file, data).map_err(|e| e.to_string())?;
+
+    Ok(())
 }
