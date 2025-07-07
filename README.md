@@ -378,6 +378,7 @@ Rust 中, 循环方式如下:
 ```rust
 fn main() {
   let mut inputs: Vec<String> = Vec::new();
+  let args: Vec<String> = std::env::args().collect();
   let mut ok = args[1].clone() == "create";
 
   while ok {
