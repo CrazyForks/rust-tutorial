@@ -301,9 +301,9 @@ Rust 是一门强类型的语言, 这意味着变量在编译时必须要有明�
 
 ```rust
   let args: Vec<String> = std::env::args().collect();
-  let len /** usize */ = args.len();
-  let title /** String */ = args[1].clone();
-  let mut content /** String */ = String::from("default content");
+  let len /* usize */ = args.len();
+  let title /* String */ = args[1].clone();
+  let mut content /* String */ = String::from("default content");
 ```
 
 Rust 支持常见的基本类型:
@@ -1259,18 +1259,24 @@ Options:
 
 这可能让人疑惑: 我们只是加了一些注释, 为什么这些注释会出现在运行时输出的帮助信息里？
 
-这是因为在 Rust 中的注释有三种方式。
+这是因为在 Rust 中的注释有三种形式。
 
 ```rust
 // 单行注释（不会被编译器解析）
+// 在 // 的所有内容都会被注释
 
 /*
-多行
-注释
+多行注释
+只有在 /* */ 范围内的内容才会被注释
 （也不会被编译器解析）
 */
 
 /// 文档注释（会被编译器和工具识别）
+
+/**
+ * 这也是文档注释
+ * 以 /** 开头
+*/
 ```
 
 我们用到的就是 `/// xxx` 即文档注释。它是编译器可识别的元信息。
